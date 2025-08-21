@@ -69,7 +69,7 @@ class RegisterComponent extends Component
         'alamat' => 'required|string|min:5',
         'telepon' => [
             'required',
-            'regex:/^08[0-9]{10,11}$/'
+            'regex:/^62[0-9]{11,12}$/'
         ],
         'password' => 'required|min:6|same:password_confirmation',
         'password_confirmation' => 'required',
@@ -85,7 +85,7 @@ class RegisterComponent extends Component
         'alamat.required' => 'Alamat wajib diisi.',
         'alamat.min' => 'Alamat terlalu pendek.',
         'telepon.required' => 'Nomor WhatsApp wajib diisi.',
-        'telepon.regex' => 'Nomor WA harus diawali 08 dan terdiri dari 12–13 digit angka.',
+        'telepon.regex' => 'Nomor WA harus diawali 62 dan terdiri dari 13–14 digit angka.',
         'password.required' => 'Password wajib diisi.',
         'password.min' => 'Password minimal 6 karakter.',
         'password.same' => 'Password dan konfirmasi harus sama.',

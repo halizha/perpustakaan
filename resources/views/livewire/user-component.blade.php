@@ -1,14 +1,15 @@
 <div>
+
+    @if (session()->has('success'))
+        <div class="alert alert-success" role="alert">
+            {{ session('success') }}
+        </div>
+    @endif
     <div class="card">
-        <div class="card-header">
+        <div class="card-header bg-primary text-white">
             Kelola User
         </div>
         <div class="card-body">
-            @if (session()->has('success'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('success') }}
-                </div>
-            @endif
             <input type="text" wire:model.live="cari" class="form-control w-50" placeholder="Cari...">
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover">
@@ -83,7 +84,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" wire:click="store" class="btn btn-primary" >Save</button>
+                    <button type="button" wire:click="store" class="btn btn-primary">Save</button>
                 </div>
             </div>
         </div>

@@ -1,5 +1,5 @@
 <div class="card">
-    <div class="card-header">
+    <div class="card-header bg-primary text-white">
         <strong>Detail Buku</strong>
     </div>
     <div class="card-body">
@@ -64,7 +64,7 @@
                         </td>
                     </tr>
                 </table>
-                <a href="{{ route('member.buku') }}" class="btn btn-primary mt-3">Kembali</a>
+                <a href="{{ route('member.kategori.buku', $buku->kategori_id) }}" class="btn btn-secondary mt-3">Kembali</a>
             </div>
         </div>
     </div>

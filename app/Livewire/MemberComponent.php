@@ -50,9 +50,9 @@ class MemberComponent extends Component
         $user = User::find($id);
 
         if ($user && $user->status === 'pending') {
-             $user->status = 'ditolak'; // ubah status dulu
-        $user->save();             // simpan perubahan status
-        $user->delete();           // baru soft delete
+            $user->status = 'ditolak';
+            $user->save();
+            $user->delete(); // soft delete
             session()->flash('success', 'Akun berhasil ditolak dan dihapus.');
         } else {
             session()->flash('error', 'Akun tidak valid atau sudah diproses.');
@@ -76,6 +76,7 @@ class MemberComponent extends Component
             'alamat.required' => 'Alamat Tidak Boleh Kosong!',
             'email.required' => 'Email Tidak Boleh Kosong!',
         ]);
+
         User::create([
             'nama' => $this->nama,
             'nis' => $this->nis,
@@ -84,8 +85,10 @@ class MemberComponent extends Component
             'telepon' => $this->telepon,
             'email' => $this->email,
             'jenis' => $this->jenis,
-            'status' => 'disetujui', // langsung disetujui!
+            'status' => 'disetujui',
+            'akun' => 'aktif', // default aktif
         ]);
+
         session()->flash('success', 'Berhasil Simpan!');
         return redirect()->route('member');
     }
@@ -95,14 +98,15 @@ class MemberComponent extends Component
         $member = User::find($id);
         $this->id = $member->id;
         $this->nama = $member->nama;
-         $this->nis = $member->nis;
-         $this->nip = $member->nip;
-          $this->kelas = $member->kelas;
+        $this->nis = $member->nis;
+        $this->nip = $member->nip;
+        $this->kelas = $member->kelas;
         $this->alamat = $member->alamat;
         $this->telepon = $member->telepon;
         $this->email = $member->email;
         $this->jenis = $member->jenis;
     }
+
     public function update()
     {
         $member = User::find($this->id);
@@ -115,18 +119,28 @@ class MemberComponent extends Component
             'email' => $this->email,
             'jenis' => $this->jenis
         ]);
+
         session()->flash('success', 'Berhasil Ubah!');
         return redirect()->route('member');
     }
+
+    // ✅ simpan ID untuk konfirmasi nonaktifkan
     public function confirm($id)
     {
         $this->id = $id;
     }
-    public function destroy()
+
+    // ✅ method nonaktifkan akun
+    public function nonaktifkan()
     {
         $member = User::find($this->id);
-        $member->delete();
-        session()->flash('success', 'Berhasil Hapus!');
-        return redirect()->route('member');
+
+        if ($member && $member->akun === 'aktif') {
+            $member->akun = 'nonaktif';
+            $member->save();
+            session()->flash('success', 'Akun berhasil dinonaktifkan.');
+        } else {
+            session()->flash('error', 'Akun tidak valid atau sudah nonaktif.');
+        }
     }
 }

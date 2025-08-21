@@ -20,7 +20,10 @@ class PinjamComponent extends Component
 
     public function render()
     {
-        $data['member'] = User::where('jenis', 'siswa')->get();
+        $data['member'] = User::where('jenis', 'siswa')
+            ->where('akun', 'aktif') // hanya siswa dengan akun aktif
+            ->get();
+
         $data['book'] = Buku::all();
         $data['pinjam'] = Pinjam::with('detail')->paginate(10);
         $layout['title'] = 'Pinjam Buku';
@@ -29,6 +32,7 @@ class PinjamComponent extends Component
 
     public function store()
     {
+
         $this->validate([
             'buku' => 'required|array|min:1',
             'user' => 'required',
@@ -38,7 +42,7 @@ class PinjamComponent extends Component
         ]);
 
         $this->tgl_pinjam = Carbon::now();
-$this->tgl_kembali = Carbon::now()->addDays(7);
+        $this->tgl_kembali = Carbon::now()->addDays(7);
 
         $pinjam = Pinjam::create([
             'user_id' => $this->user,

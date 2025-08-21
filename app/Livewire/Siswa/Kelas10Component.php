@@ -9,16 +9,16 @@ use Livewire\WithPagination;
 class Kelas10Component extends Component
 {
     use WithPagination;
-    public $nama, $nis, $kelas = 'X.', $alamat, $telepon, $email, $password;
     protected $paginationTheme = 'bootstrap';
-    public $cari;
+
+    public $nama, $nis, $kelas = 'X.', $alamat, $telepon, $email, $password;
+    public $cari, $id;
 
     public function render()
     {
         $query = User::where('status', 'disetujui')
             ->where('jenis', 'siswa')
             ->whereRaw("REPLACE(UPPER(kelas), ' ', '') LIKE 'X.%'");
-
 
         if ($this->cari != '') {
             $search = str_replace(' ', '', strtoupper($this->cari));
@@ -29,12 +29,17 @@ class Kelas10Component extends Component
             });
         }
 
+        // ✅ Urutkan dulu berdasarkan kelas, lalu nama
+        $query->orderByRaw("CAST(SUBSTRING_INDEX(kelas, '.', -1) AS UNSIGNED) ASC")
+            ->orderBy('nama', 'asc');
+
         $data['siswaKelas10'] = $query->paginate(10);
 
         $layout['title'] = 'Siswa Kelas 10';
         return view('livewire.siswa.kelas10-component', $data)
             ->layoutData($layout);
     }
+
 
     public function store()
     {
@@ -48,10 +53,9 @@ class Kelas10Component extends Component
             'password' => 'required|string|min:6'
         ]);
 
-        // Bersihkan kelas: hapus spasi, kapitalisasi huruf romawi
+        // Format kelas (hapus spasi, kapitalisasi)
         $kelasFormatted = strtoupper(str_replace(' ', '', $this->kelas));
 
-        // Simpan ke tabel users
         User::create([
             'nama' => $this->nama,
             'nis' => $this->nis,
@@ -59,16 +63,32 @@ class Kelas10Component extends Component
             'alamat' => $this->alamat,
             'telepon' => $this->telepon,
             'email' => $this->email,
-            'status' => 'disetujui', // langsung valid
-            'jenis' => 'siswa',      // karena ini kelas 10
-            'password' => $this->password, // default password
+            'status' => 'disetujui',
+            'akun' => 'aktif',   // ✅ default aktif
+            'jenis' => 'siswa',
+            'password' => bcrypt($this->password),
         ]);
 
-        // Reset form
-        $this->reset(['nama', 'nis', 'kelas', 'alamat', 'telepon', 'email']);
+        $this->reset(['nama', 'nis', 'kelas', 'alamat', 'telepon', 'email', 'password']);
         $this->kelas = 'X.';
 
-        session()->flash('message', 'Siswa berhasil ditambahkan.');
+        session()->flash('success', 'Siswa berhasil ditambahkan.');
         return redirect()->route('siswa.kelas10');
+    }
+
+    public function confirm($id)
+    {
+        $this->id = $id;
+    }
+
+    public function nonaktifkan()
+    {
+        $member = User::find($this->id);
+
+        if ($member && $member->akun === 'aktif') {
+            $member->akun = 'nonaktif';
+            $member->save();
+            session()->flash('success', 'Akun berhasil dinonaktifkan.');
+        }
     }
 }

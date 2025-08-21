@@ -2,7 +2,7 @@
     <div class="card">
         
             @if ($pinjam->count())
-        <div class="card-header">
+        <div class="card-header bg-primary text-white">
             Data Peminjaman Buku
         </div>
         <div class="card-body">
@@ -50,7 +50,7 @@
     
 
     <div class="card">
-        <div class="card-header">
+        <div class="card-header bg-primary text-white">
             Daftar Buku Dikembalikan
         </div>
         <div class="card-body">
@@ -158,7 +158,7 @@
                             Jumlah Denda
                         </div>
                         <div class="col-md-8">
-                            : {{ $status * 1000 }}
+                            : {{ $status * 500 }}
                         </div>
                     </div>
                 </div>

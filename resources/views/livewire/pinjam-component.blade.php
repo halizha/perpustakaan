@@ -5,7 +5,7 @@
         </div>
     @endif
     <div class="card">
-        <div class="card-header">
+        <div class="card-header bg-primary text-white">
             Data Peminjaman Buku
         </div>
         <div class="card-body">
@@ -188,7 +188,7 @@
                     cache: true
                 }
             }).on('change', function() {
-                let selectedBuku = $(this).val();
+                let selectedBuku = $(this).val() || [];
                 @this.set('buku', selectedBuku);
             });
 

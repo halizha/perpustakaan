@@ -1,44 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title', 'Perpustakaan')</title>
     <link rel="icon" href="data:,">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
 
-    {{--<link href="{{ asset('assets/estartup/img/favicon.png') }}" rel="icon">
-    <link href="{{ asset('assets/estartup/img/apple-touch-icon.png') }}" rel="apple-touch-icon">--}}
-    <link href="https://fonts.googleapis.com" rel="preconnect">
-    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
-        rel="stylesheet">
 
-    <link href="{{ asset('assets/estartup/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/estartup/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/estartup/vendor/aos/aos.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/estartup/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/estartup/css/main.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        footer {
+            background: #343a40;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            margin-top: 40px;
+        }
+    </style>
 </head>
 
-<body class="index-page">
+
+<body>
+    {{-- Navbar --}}
+
+
+    {{-- Konten --}}
+
 
     @yield('content')
 
-    <!-- Scroll Top -->
-    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
-        <i class="bi bi-arrow-up-short"></i>
-    </a>
 
-    <div id="preloader"></div>
+    {{-- <footer>
+        <p class="mb-0">© {{ date('Y') }} Perpustakaan SMA Negeri 1</p>
+    </footer> --}}
 
-    <script src="{{ asset('assets/estartup/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/estartup/vendor/php-email-form/validate.js') }}"></script>
-    <script src="{{ asset('assets/estartup/vendor/aos/aos.js') }}"></script>
-    <script src="{{ asset('assets/estartup/vendor/glightbox/js/glightbox.min.js') }}"></script>
-    <script src="{{ asset('assets/estartup/js/main.js') }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
 </body>
 
 </html>

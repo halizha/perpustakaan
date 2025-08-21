@@ -1,6 +1,6 @@
 <div>
     <div class="card">
-        <div class="card-header">
+        <div class="card-header bg-primary text-white">
             Kelola Kategori Buku
         </div>
         <div class="card-body">
@@ -71,7 +71,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" wire:click="store" class="btn btn-primary" >Save</button>
+                    <button type="button" wire:click="store" class="btn btn-primary">Save</button>
                 </div>
             </div>
         </div>

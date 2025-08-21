@@ -14,7 +14,7 @@ class Pinjam extends Model
 
     protected $table = 'pinjams';
     protected $primaryKey = 'id';
-    protected $fillable = ['id', 'buku_id', 'user_id', 'tgl_pinjam', 'tgl_kembali', 'status'];
+    protected $fillable = ['id', 'user_id', 'tgl_pinjam', 'tgl_kembali', 'status'];
 
     public function user(): BelongsTo
     {
@@ -25,4 +25,6 @@ class Pinjam extends Model
     {
         return $this->hasMany(DetailPinjam::class, 'pinjam_id');
     }
+
+    
 }

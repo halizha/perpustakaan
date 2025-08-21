@@ -1,13 +1,14 @@
 <div class="card">
-    <div class="card-header">
+    <div class="card-header bg-primary text-white">
         Daftar Buku
     </div>
     <div class="card-body">
         <input type="text" wire:model.live="cari" class="form-control w-50 mb-3" placeholder="Cari...">
 
-        <div class="row">
+        {{-- Grid 5 kolom --}}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
             @foreach ($buku as $item)
-                <div class="col-md-3 mb-4">
+                <div class="col">
                     <div class="card h-100 shadow-sm">
                         @if ($item->sampul)
                             <img src="{{ asset('storage/' . $item->sampul) }}" class="card-img-top" alt="Sampul Buku">
@@ -20,14 +21,16 @@
                                 <small>Penulis: {{ $item->penulis }}</small><br>
                                 <small>Penerbit: {{ $item->penerbit }}</small>
                             </p>
-                            <a href="{{ route('member.buku.detail', $item->id) }}"
-                                class="btn btn-primary btn-sm">Detail</a>
+                            <a href="{{ route('member.buku.detail', $item->id) }}" class="btn btn-primary btn-sm">Detail</a>
                         </div>
                     </div>
                 </div>
             @endforeach
         </div>
-        {{ $buku->links() }}
+
+        {{-- Pagination --}}
+        <div class="mt-3">
+            {{ $buku->links() }}
+        </div>
     </div>
-</div>
 </div>

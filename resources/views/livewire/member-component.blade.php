@@ -6,7 +6,7 @@
     @endif
     <div class="card mb-4">
         @if ($pending->count())
-            <div class="card-header ">
+            <div class="card-header bg-primary text-white">
                 Member Pending
             </div>
             <div class="card-body">
@@ -55,54 +55,87 @@
         @endif
     </div>
 
-    <div class="card">
-        <div class="card-header ">
-            Member Disetujui
-        </div>
-        <div class="card-body">
-            <input type="text" wire:model.live="cari" class="form-control w-50 mb-3" placeholder="Cari...">
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover">
-                    <thead>
+   <div class="card">
+    <div class="card-header bg-primary text-white">
+        Member Disetujui
+    </div>
+    <div class="card-body">
+        
+
+        <input type="text" wire:model.live="cari" class="form-control w-50 mb-3" placeholder="Cari...">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Lengkap</th>
+                        <th>Alamat</th>
+                        <th>No WA</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Akun</th>
+                        <th>Proses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($disetujui as $data)
                         <tr>
-                            <th>No</th>
-                            <th>Nama Lengkap</th>
-                            <th>NIS</th>
-                            <th>Kelas</th>
-                            <th>Alamat</th>
-                            <th>No WA</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Proses</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($disetujui as $data)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $data->nama }}</td>
-                                <td>{{ $data->nis }}</td>
-                                <td>{{ $data->kelas }}</td>
-                                <td>{{ $data->alamat }}</td>
-                                <td>{{ $data->telepon }}</td>
-                                <td>{{ $data->email }}</td>
-                                <td>{{ $data->jenis }}</td>
-                                <td>
-                                    <a href="#" wire:click="edit({{ $data->id }})"
-                                        class="btn btn-sm btn-info" data-toggle="modal" data-target="#editPage">Ubah</a>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $data->nama }}</td>
+                            <td>{{ $data->alamat }}</td>
+                            <td>{{ $data->telepon }}</td>
+                            <td>{{ $data->email }}</td>
+                            <td>{{ $data->jenis }}</td>
+                            <td>
+                                @if($data->akun === 'aktif')
+                                    <span class="badge bg-success">Aktif</span>
+                                @else
+                                    <span class="badge bg-secondary">Nonaktif</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($data->akun === 'aktif')
                                     <a href="#" wire:click="confirm({{ $data->id }})"
-                                        class="btn btn-sm btn-danger" data-toggle="modal"
-                                        data-target="#deletePage">Hapus</a>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                {{ $disetujui->links() }}
-                <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#addPage">Tambah</a>
+                                        class="btn btn-sm btn-warning" data-toggle="modal"
+                                        data-target="#confirmNonaktif">Nonaktifkan</a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            {{ $disetujui->links() }}
+            <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#addPage">Tambah</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Nonaktifkan -->
+<div wire:ignore.self class="modal fade" id="confirmNonaktif" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Konfirmasi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Yakin untuk menonaktifkan akun ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" wire:click="nonaktifkan" class="btn btn-warning" data-dismiss="modal">
+                    Ya, Nonaktifkan
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+
 
     {{-- Tambah --}}
     <div wire:ignore.self class="modal fade" id="addPage" tabindex="-1" aria-labelledby="exampleModalLabel"

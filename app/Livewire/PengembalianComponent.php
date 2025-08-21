@@ -23,10 +23,10 @@ class PengembalianComponent extends Component
     {
         $layout['title'] = 'Pengembalian Buku';
         $data['pinjam'] = DetailPinjam::whereNotIn('id', function ($query) {
-        $query->select('detail_pinjam_id')->from('pengembalians');
-    })
-    ->with(['buku', 'pinjam.user'])
-    ->paginate(10);
+            $query->select('detail_pinjam_id')->from('pengembalians');
+        })
+            ->with(['buku', 'pinjam.user'])
+            ->paginate(10);
         $data['pengembalian'] = Pengembalian::with(['pinjam.user', 'detail.buku'])->paginate(10);
         return view('livewire.pengembalian-component', $data)->layoutData($layout);
     }
@@ -72,8 +72,15 @@ class PengembalianComponent extends Component
             'tgl_kembali' => $this->tgl_kembali,
             'denda' => $this->denda ?? 0,
         ]);
-        $pinjamId = $detail->pinjam_id;
 
+        // *** Tambahan untuk balikin stok buku ***
+        $buku = $detail->buku;
+        $buku->increment('jumlah');
+        if ($buku->jumlah > 0) {
+            $buku->status = 'tersedia';
+            $buku->save();
+        }
+        $pinjamId = $detail->pinjam_id;
         $totalBuku = DetailPinjam::where('pinjam_id', $pinjamId)->pluck('id')->toArray();
         $bukuDikembalikan = Pengembalian::where('pinjam_id', $pinjamId)->pluck('detail_pinjam_id')->toArray();
 
