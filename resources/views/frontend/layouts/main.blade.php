@@ -8,9 +8,6 @@
     <link rel="icon" href="data:,">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
-
 
     <style>
         body {
@@ -25,25 +22,23 @@
             margin-top: 40px;
         }
     </style>
-</head>
 
+    @livewireStyles <!-- Tambahkan ini -->
+</head>
 
 <body>
     {{-- Navbar --}}
 
-
     {{-- Konten --}}
-
-
     @yield('content')
 
-
+    {{-- Footer --}}
     {{-- <footer>
         <p class="mb-0">© {{ date('Y') }} Perpustakaan SMA Negeri 1</p>
     </footer> --}}
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @livewireScripts <!-- Tambahkan ini -->
     @stack('scripts')
 </body>
 

@@ -47,41 +47,46 @@
                 </button>
             </div>
             <div class="card-body table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nama Peminjam</th>
-                            <th>Jenis</th>
-                            <th>Judul Buku</th>
-                            <th>Tanggal Pinjam</th>
-                            <th>Tanggal Kembali</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($pinjam as $item)
-                            <tr>
-                                <td>{{ $item->user->nama }}</td>
-                                <td>{{ ucfirst($item->user->jenis) }}</td>
-                                <td>
-                                    @foreach ($item->detail as $d)
-                                        {{ $d->buku->judul ?? '-' }}<br>
-                                    @endforeach
-                                </td>
-                                <td>{{ $item->tgl_pinjam }}</td>
-                                <td>{{ $item->tgl_kembali }}</td>
-                                <td>{{ ucfirst($item->status) }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center">Tidak ada data</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Peminjam</th>
+                <th>Kelas</th>
+                <th>Jenis</th>
+                <th>Judul Buku</th>
+                <th>Tanggal Pinjam</th>
+                <th>Tanggal Kembali</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($pinjam as $item)
+                <tr>
+                    <td>{{ $loop->iteration + ($pinjam->firstItem() - 1) }}</td>
+                    <td>{{ $item->user->nama }}</td>
+                    <td>{{ $item->user->kelas }}</td>
+                    <td>{{ ucfirst($item->user->jenis) }}</td>
+                    <td>
+                        @foreach ($item->detail as $d)
+                            {{ $d->buku->judul ?? '-' }}<br>
+                        @endforeach
+                    </td>
+                    <td>{{ \Carbon\Carbon::parse($item->tgl_pinjam)->format('d-m-Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($item->tgl_kembali)->format('d-m-Y') }}</td>
+                    <td>{{ ucfirst($item->status) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center">Tidak ada data</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 
-                {{ $pinjam->links() }}
-            </div>
+    {{ $pinjam->links() }}
+</div>
+
         </div>
     @endif
 </div>

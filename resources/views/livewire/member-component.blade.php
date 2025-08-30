@@ -17,7 +17,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>Nama Lengkap</th>
-                                <th>NIS</th>
+                                <th>NISN</th>
                                 <th>Kelas</th>
                                 <th>NIP</th>
                                 <th>Alamat</th>
@@ -32,7 +32,7 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $data->nama }}</td>
-                                    <td>{{ $data->nis }}</td>
+                                    <td>{{ $data->nisn }}</td>
                                     <td>{{ $data->kelas }}</td>
                                     <td>{{ $data->nip }}</td>
                                     <td>{{ $data->alamat }}</td>
@@ -171,9 +171,9 @@
 
                         {{-- NIS & KELAS untuk Siswa --}}
                         <div id="studentFields" style="{{ $jenis == 'siswa' ? '' : 'display: none;' }}">
-                            <label>NIS</label>
-                            <input type="text" wire:model="nis" class="form-control">
-                            @error('nis')
+                            <label>NISN</label>
+                            <input type="text" wire:model="nisn" class="form-control">
+                            @error('nisn')
                                 <div class="form-text text-danger">{{ $message }}</div>
                             @enderror
 
@@ -255,10 +255,10 @@
                             @enderror
                         </div>
                         <div class="form-group">
-                            <label>NIS</label>
-                            <input type="text" class="form-control" wire:model="nis"
-                                value="{{ @old('nis') }}">
-                            @error('nis')
+                            <label>NISN</label>
+                            <input type="text" class="form-control" wire:model="nisn"
+                                value="{{ @old('nisn') }}">
+                            @error('nisn')
                                 <small class="form-text text-danger">{{ $message }}</small>
                             @enderror
                         </div>

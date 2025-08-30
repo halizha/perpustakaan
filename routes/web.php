@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\KartuController;
+use App\Http\Controllers\KartuGuruController;
 use App\Http\Controllers\SearchController;
+use App\Http\Livewire\RakComponent;
 use App\Livewire\RiwayatComponent;
 use App\Livewire\AdminComponent;
 use App\Livewire\BukuComponent;
@@ -11,6 +14,7 @@ use App\Livewire\GuruComponent;
 use App\Livewire\GuruDashboard;
 use App\Livewire\HomeComponent;
 use App\Livewire\KategoriComponent;
+use App\Livewire\LaporanAnggotaComponent;
 use App\Livewire\LaporanBukuComponent;
 use App\Livewire\LaporanPeminjamanComponent;
 use App\Livewire\LoginComponent;
@@ -21,12 +25,14 @@ use App\Livewire\MemberDashboardComponent;
 use App\Livewire\MemberKategoriComponent;
 use App\Livewire\PengembalianComponent;
 use App\Livewire\PinjamComponent;
+use App\Livewire\RakComponent as LivewireRakComponent;
 use App\Livewire\RegisterComponent;
 use App\Livewire\Siswa\Kelas10Component;
 use App\Livewire\Siswa\Kelas11Component;
 use App\Livewire\Siswa\Kelas12Component;
 use App\Livewire\UserComponent;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\SlotComponent;
 
 use App\Models\Kategori;
 use App\Services\FonnteService;
@@ -70,6 +76,10 @@ Route::get('/guru', GuruComponent::class)->name('guru');
 Route::get('/kategori', KategoriComponent::class)->name('kategori')->middleware('auth');
 Route::get('/buku', BukuComponent::class)->name('buku')->middleware('auth');
 
+Route::get('/rak', LivewireRakComponent::class)->name('rak')->middleware('auth');
+Route::get('/rak/{id}/detail', SlotComponent::class)->name('rak.detail');
+
+
 Route::get('/pinjam', PinjamComponent::class)->name('pinjam')->middleware('auth');
 Route::get('/pinjam/{id}', DetailPinjamComponent::class)->name('pinjam.detail')->middleware('auth');
 
@@ -77,6 +87,7 @@ Route::get('/pengembalian', PengembalianComponent::class)->name('pengembalian')-
 
 Route::get('/laporan/peminjaman', LaporanPeminjamanComponent::class)->name('laporan.peminjaman');
 Route::get('/laporan/buku', LaporanBukuComponent::class)->name('laporan.buku');
+Route::get('/laporan/anggota', LaporanAnggotaComponent::class)->name('laporan.anggota');
 
 Route::get('/login', LoginComponent::class)->name('login');
 Route::get('/logout', LoginComponent::class, 'keluar')->name('logout');
@@ -93,70 +104,45 @@ Route::get('/', function () {
 Route::get('/kategori/{id}', BukuByKategori::class)->name('kategori.buku');
 Route::get('/buku/{id}', BukuDetail::class)->name('buku.detail');
 
+Route::get('/siswa/kartu/cetak', [KartuController::class, 'cetak'])->name('siswa.kartu.cetak');
+Route::get('/guru/kartu/cetak', [KartuGuruController::class, 'cetak'])->name('guru.kartu.cetak');
+
 Route::get('/test-wa', function () {
-    $today = Carbon::now()->toDateString();
-    $besok = Carbon::now()->addDay()->toDateString();
-
-    // H-1 → pengingat besok
-    $pinjamanH1 = Pinjam::with(['user', 'detail.buku'])
-        ->whereDate('tgl_kembali', $besok)
+    $pinjaman = Pinjam::with(['user', 'detail.buku'])
         ->where('status', 'pinjam')
-        ->get();
+        ->first(); // ambil 1 data aja buat ngetes
 
-    foreach ($pinjamanH1 as $pinjam) {
-        $nama = $pinjam->user->nama;
-        $telepon = $pinjam->user->telepon;
-        $judulBuku = $pinjam->detail->map(fn($d) => $d->buku->judul)->join(', ');
-        $tglKembali = $pinjam->tgl_kembali;
-
-        $pesan = "Halo {$nama}, 👋\n"
-            . "Ingat ya, buku \"{$judulBuku}\" yang kamu pinjam akan jatuh tempo besok ({$tglKembali}).\n"
-            . "Pastikan buku dikembalikan tepat waktu supaya nggak kena denda 📚.";
-
-        FonnteService::sendMessage($telepon, $pesan);
+    if (!$pinjaman) {
+        return "Tidak ada data pinjaman.";
     }
 
-    // H → pengingat hari ini
-    $pinjamanH = Pinjam::with(['user', 'detail.buku'])
-        ->whereDate('tgl_kembali', $today)
-        ->where('status', 'pinjam')
-        ->get();
+    $nama = $pinjaman->user->nama;
+    $telepon = $pinjaman->user->telepon;
+    $judulBuku = $pinjaman->detail->map(fn($d) => $d->buku->judul)->join(', ');
 
-    foreach ($pinjamanH as $pinjam) {
-        $nama = $pinjam->user->nama;
-        $telepon = $pinjam->user->telepon;
-        $judulBuku = $pinjam->detail->map(fn($d) => $d->buku->judul)->join(', ');
-        $tglKembali = $pinjam->tgl_kembali;
+    // Format tanggal jadi d-m-Y
+    $tglKembali = Carbon::parse($pinjaman->tgl_kembali)->format('d-m-Y');
 
-        $pesan = "Halo {$nama}, 👋\n"
-            . "Buku \"{$judulBuku}\" yang kamu pinjam jatuh tempo hari ini ({$tglKembali}).\n"
-            . "Segera dikembalikan ya supaya tidak terkena denda 📚.";
+    // --- Simulasi H-1 ---
+    $pesanH1 = "Halo {$nama}, 👋\n"
+        . "Ingat ya, buku \"{$judulBuku}\" yang kamu pinjam akan jatuh tempo BESOK ({$tglKembali}).\n"
+        . "Pastikan buku dikembalikan tepat waktu supaya nggak kena denda 📚.";
+    FonnteService::sendMessage($telepon, $pesanH1);
 
-        FonnteService::sendMessage($telepon, $pesan);
-    }
+    // --- Simulasi H ---
+    $pesanH = "Halo {$nama}, 👋\n"
+        . "Buku \"{$judulBuku}\" yang kamu pinjam jatuh tempo HARI INI ({$tglKembali}).\n"
+        . "Segera dikembalikan ya supaya tidak terkena denda 📚.";
+    FonnteService::sendMessage($telepon, $pesanH);
 
-    // H+1 → peminjaman terlambat
-    $pinjamanTerlambat = Pinjam::with(['user', 'detail.buku'])
-        ->whereDate('tgl_kembali', '<', $today)
-        ->where('status', 'pinjam')
-        ->get();
+    // --- Simulasi H+1 ---
+    $hariTerlambat = 1; // dipaksa 1 hari
+    $denda = $hariTerlambat * 500;
+    $pesanHplus1 = "Halo {$nama}, ⚠️\n"
+        . "Buku \"{$judulBuku}\" yang kamu pinjam seharusnya dikembalikan pada {$tglKembali}.\n"
+        . "Saat ini terlambat {$hariTerlambat} hari, denda sebesar Rp{$denda}.\n"
+        . "Segera kembalikan buku ya 📚.";
+    FonnteService::sendMessage($telepon, $pesanHplus1);
 
-    foreach ($pinjamanTerlambat as $pinjam) {
-        $nama = $pinjam->user->nama;
-        $telepon = $pinjam->user->telepon;
-        $judulBuku = $pinjam->detail->map(fn($d) => $d->buku->judul)->join(', ');
-        $tglKembali = $pinjam->tgl_kembali;
-
-        $hariTerlambat = Carbon::now()->diffInDays(Carbon::parse($tglKembali));
-        $denda = $hariTerlambat * 500;
-
-        $pesan = "Halo {$nama}, ⚠️\n"
-            . "Buku \"{$judulBuku}\" yang kamu pinjam seharusnya dikembalikan pada {$tglKembali}.\n"
-            . "Saat ini terlambat {$hariTerlambat} hari, denda sebesar Rp{$denda}.\n"
-            . "Segera kembalikan buku ya 📚.";
-
-        FonnteService::sendMessage($telepon, $pesan);
-    }
-
-    return "WA H-1, H, H+1 berhasil dijalankan (cek log terminal atau WA).";
+    return "✅ 3 pesan (H-1, H, H+1) berhasil dikirim ke {$telepon}";
 });

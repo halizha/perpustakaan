@@ -28,6 +28,7 @@ class LaporanPeminjamanComponent extends Component
 
     public function render()
     {
+        $x['title'] = "Laporan Peminjaman";
         $pinjam = collect(); // default kosong
 
         if ($this->showTable) {
@@ -66,7 +67,8 @@ class LaporanPeminjamanComponent extends Component
             $pinjam = $query->latest()->paginate(10);
         }
 
-        return view('livewire.laporan-peminjaman-component', compact('pinjam'));
+        return view('livewire.laporan-peminjaman-component', compact('pinjam'))->layoutData($x);
+        
     }
 
     public function getJudulProperty()

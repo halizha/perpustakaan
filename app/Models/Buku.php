@@ -11,12 +11,22 @@ class Buku extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table='bukus';
-    protected $primaryKey='id';
-    protected $fillable=['id', 'kategori_id', 'judul', 'penulis', 'penerbit', 'isbn', 'tahun', 'jumlah', 'sampul', 'kode_rak', 'sinopsis', 'status'];
+    protected $table = 'bukus';
+    protected $primaryKey = 'id';
+    protected $fillable = ['id', 'kategori_id', 'judul', 'penulis', 'penerbit', 'isbn', 'tahun', 'jumlah', 'sampul', 'kode_rak', 'sinopsis', 'status', 'slot_id'];
 
     public function kategori(): BelongsTo
     {
         return $this->belongsTo(Kategori::class);
+    }
+
+    public function detail()
+    {
+        return $this->hasMany(DetailPinjam::class); // tetap pakai nama detail
+    }
+
+    public function slot()
+    {
+        return $this->belongsTo(Slot::class, 'slot_id', 'id_slot');
     }
 }

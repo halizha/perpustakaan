@@ -17,9 +17,9 @@ class RiwayatComponent extends Component
     {
         $x['title'] = "Riwayat";
         $riwayat = Pinjam::with(['detail.buku'])
-                    ->where('user_id', auth()->id())
-                    ->orderBy('tgl_pinjam', 'desc')
-                    ->paginate(10);
+            ->where('user_id', auth()->id())
+            ->orderBy('tgl_pinjam', 'desc')
+            ->paginate(10);
 
         // Tambahin perhitungan denda
         foreach ($riwayat as $pinjam) {
@@ -48,7 +48,7 @@ class RiwayatComponent extends Component
             $pinjam->denda = $denda;
         }
 
- return view('livewire.riwayat-component', compact('riwayat'))
-                ->layoutData($x);    }
+        return view('livewire.riwayat-component', compact('riwayat'))
+            ->layoutData($x);
+    }
 }
-

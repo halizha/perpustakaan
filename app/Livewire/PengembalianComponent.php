@@ -18,6 +18,8 @@ class PengembalianComponent extends Component
     // Variabel-variabel public
     public $id, $judul, $member, $tgl_kembali, $lama, $status, $denda;
     public $detail_pinjam_id, $pinjam_id;
+    public $cariPinjam = '';
+    public $cariPengembalian = '';
 
     public function render()
     {
@@ -25,9 +27,14 @@ class PengembalianComponent extends Component
         $data['pinjam'] = DetailPinjam::whereNotIn('id', function ($query) {
             $query->select('detail_pinjam_id')->from('pengembalians');
         })
+            ->whereHas('pinjam.user') // hanya yang user-nya masih ada
             ->with(['buku', 'pinjam.user'])
             ->paginate(10);
-        $data['pengembalian'] = Pengembalian::with(['pinjam.user', 'detail.buku'])->paginate(10);
+        $data['pengembalian'] = Pengembalian::with(['pinjam.user', 'detail.buku'])
+            ->whereHas('pinjam.user', function ($q) {
+                $q->where('nama', 'like', '%' . $this->cariPengembalian . '%');
+            })
+            ->paginate(10);
         return view('livewire.pengembalian-component', $data)->layoutData($layout);
     }
 

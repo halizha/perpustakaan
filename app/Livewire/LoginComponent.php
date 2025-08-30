@@ -44,18 +44,17 @@ class LoginComponent extends Component
             }
 
             if ($user->jenis === 'admin') {
-    return redirect()->route('home');
-} elseif ($user->jenis === 'siswa') {
-    return redirect()->route('member.dashboard');
-} elseif ($user->jenis === 'guru') {
-    return redirect()->route('guru.dashboard');
-} else {
-    Auth::logout();
-    return redirect()->route('home')->withErrors([
-        'email' => 'Role tidak dikenali!',
-    ]);
-}
-
+                return redirect()->route('home');
+            } elseif ($user->jenis === 'siswa') {
+                return redirect()->route('member.dashboard');
+            } elseif ($user->jenis === 'guru') {
+                return redirect()->route('guru.dashboard');
+            } else {
+                Auth::logout();
+                return redirect()->route('home')->withErrors([
+                    'email' => 'Role tidak dikenali!',
+                ]);
+            }
         }
 
         $this->errorMessage = 'Email atau password salah!';

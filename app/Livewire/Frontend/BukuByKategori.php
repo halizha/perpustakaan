@@ -16,7 +16,7 @@ class BukuByKategori extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    // reset pagination kalau search berubah
+    // Reset pagination jika search berubah
     public function updatingSearch()
     {
         $this->resetPage();
@@ -25,6 +25,11 @@ class BukuByKategori extends Component
     public function mount($id)
     {
         $this->idKategori = $id;
+    }
+
+    public function searchBooks()
+    {
+        $this->resetPage(); // Reset pagination jika diperlukan
     }
 
     public function render()

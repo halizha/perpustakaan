@@ -1,14 +1,14 @@
 <div>
     <div class="card">
+        @if (session()->has('success'))
+            <div class="alert alert-success" role="alert">
+                {{ session('success') }}
+            </div>
+        @endif
         <div class="card-header bg-primary text-white">
             Kelola Kategori Buku
         </div>
         <div class="card-body">
-            @if (session()->has('success'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('success') }}
-                </div>
-            @endif
             <input type="text" wire:model.live="cari" class="form-control w-50" placeholder="Cari...">
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover">

@@ -10,7 +10,7 @@ class RegisterComponent extends Component
 {
     public $nama, $email, $alamat, $telepon, $password, $password_confirmation;
     public $jenis;
-    public $nis, $nip, $kelas;
+    public $nisn, $nip, $kelas;
 
     protected $rules = [
         'nama' => 'required|string|max:255',
@@ -23,7 +23,7 @@ class RegisterComponent extends Component
         'password' => 'required|min:6|same:password_confirmation',
         'password_confirmation' => 'required',
         'jenis' => 'required',
-        'nis' => 'required_if:jenis,siswa',
+        'nisn' => 'required_if:jenis,siswa',
         'kelas' => 'required_if:jenis,siswa',
         'nip' => 'required_if:jenis,guru',
     ];
@@ -42,7 +42,7 @@ class RegisterComponent extends Component
         'password.same' => 'Password dan konfirmasi harus sama.',
         'password_confirmation.required' => 'Konfirmasi password wajib diisi.',
         'jenis.required' => 'Jenis wajib dipilih.',
-        'nis.required' => 'NIS wajib diisi.',
+        'nisn.required' => 'NISN wajib diisi.',
         'kelas.required' => 'Kelas wajib diisi.',
         'nip.required' => 'NIP wajib diisi.',
     ];
@@ -56,7 +56,7 @@ class RegisterComponent extends Component
         'password' => 'Password',
         'password_confirmation' => 'Konfirmasi Password',
         'jenis' => 'Jenis',
-        'nis' => 'NIS',
+        'nisn' => 'NISN',
         'kelas' => 'Kelas',
         'nip' => 'NIP',
     ];
@@ -74,7 +74,7 @@ class RegisterComponent extends Component
         'password' => 'required|min:6|same:password_confirmation',
         'password_confirmation' => 'required',
         'jenis' => 'required',
-        'nis' => 'required_if:jenis,siswa|max:5',
+        'nisn' => 'required_if:jenis,siswa',
         'nip' => 'required_if:jenis,guru',
         'kelas' => 'required_if:jenis,siswa',
     ], [
@@ -91,7 +91,7 @@ class RegisterComponent extends Component
         'password.same' => 'Password dan konfirmasi harus sama.',
         'password_confirmation.required' => 'Konfirmasi password wajib diisi.',
         'jenis.required' => 'Silahkan pilih status.',
-        'nis.required_if' => 'NIS wajib diisi untuk siswa.',
+        'nisn.required_if' => 'NISN wajib diisi untuk siswa.',
         'nip.required_if' => 'NIP wajib diisi untuk guru.',
         'kelas.required_if' => 'Kelas wajib diisi untuk siswa.',
     ]);

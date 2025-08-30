@@ -20,10 +20,10 @@
                         @php
                             $iconMap = [
                                 'Novel' => 'bi-book',
-                                'Non Fiksi' => 'bi-journal-text',
-                                'Teknologi' => 'bi-cpu',
-                                'Sejarah' => 'bi-hourglass-split',
-                                'Sains' => 'bi-lightbulb',
+                                'Bahasa' => 'bi-journal-text',
+                                'IPA' => 'bi-cpu',
+                                'IPS' => 'bi-hourglass-split',
+                                'Matematika' => 'bi-lightbulb',
                                 'Agama' => 'bi-moon-stars',
                             ];
                             $icon = $iconMap[$item->nama] ?? 'bi-book';

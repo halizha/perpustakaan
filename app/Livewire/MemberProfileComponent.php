@@ -46,7 +46,8 @@ class MemberProfileComponent extends Component
             $this->foto->storeAs('public/profile', $user->id . '.jpg');
         }
 
-        session()->flash('success', 'Profil berhasil diperbarui.');
+        session()->flash('success', 'Berhasil Edit Profile!');
+        return redirect()->route('member.profile');
     }
 
     public function render()

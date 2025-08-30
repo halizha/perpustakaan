@@ -5,8 +5,11 @@
         </div>
     @endif
     <div class="card">
-        <div class="card-header bg-primary text-white">
-            Siswa Kelas 11
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span>Siswa Kelas 11</span>
+            <button class="btn btn-success btn-sm" wire:click="cetakKartu">
+                Cetak Kartu
+            </button>
         </div>
 
         <div class="card-body">
@@ -17,9 +20,12 @@
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
                         <tr>
+                            <th>
+                                <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll">
+                            </th>
                             <th>No</th>
                             <th>Nama</th>
-                            <th>NIS</th>
+                            <th>NISN</th>
                             <th>Kelas</th>
                             <th>Alamat</th>
                             <th>No WA</th>
@@ -31,9 +37,10 @@
                     <tbody>
                         @forelse ($siswaKelas11 as $data)
                             <tr>
+                                <td><input type="checkbox" wire:model.defer="selected" value="{{ $data->id }}"></td>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $data->nama }}</td>
-                                <td>{{ $data->nis }}</td>
+                                <td>{{ $data->nisn }}</td>
                                 <td>{{ $data->kelas }}</td>
                                 <td>{{ $data->alamat }}</td>
                                 <td>{{ $data->telepon }}</td>
@@ -95,8 +102,8 @@
 
                         <div class="form-group">
                             <label>NIS</label>
-                            <input type="text" wire:model="nis" class="form-control">
-                            @error('nis')
+                            <input type="text" wire:model="nisn" class="form-control">
+                            @error('nisn')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>

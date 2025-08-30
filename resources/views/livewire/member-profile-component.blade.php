@@ -1,6 +1,12 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
+            @if (session()->has('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
             <div class="card shadow-lg border-0 rounded-lg">
                 <!-- Header -->
                 <div class="card-header bg-primary text-white text-center py-4">
@@ -36,8 +42,8 @@
                         </div>
                     @elseif($user->jenis === 'siswa')
                         <div class="row mb-3">
-                            <div class="col-4 text-muted fw-bold">NIS</div>
-                            <div class="col-8">{{ $user->nis ?? '-' }}</div>
+                            <div class="col-4 text-muted fw-bold">NISN</div>
+                            <div class="col-8">{{ $user->nisn ?? '-' }}</div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-4 text-muted fw-bold">Kelas</div>
@@ -68,49 +74,50 @@
 
             </div>
         </div>
-       <!-- Modal Edit Profil -->
-<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title">Edit Profil</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-            <form wire:submit.prevent="updateProfile" enctype="multipart/form-data">
-                <!-- Foto Profil -->
-                <div class="mb-3 text-center">
-                    <img src="{{ asset('storage/profile/' . Auth::id() . '.jpg') }}" 
-                         onerror="this.src='{{ asset('assets/default.png') }}'" 
-                         class="rounded-circle mb-3"
-                         style="width:100px; height:100px; object-fit:cover;">
-                    
-                    <input type="file" class="form-control" wire:model="foto">
-                    @error('foto') <small class="text-danger">{{ $message }}</small> @enderror
-                </div>
+        <!-- Modal Edit Profil -->
+        <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">Edit Profil</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form wire:submit.prevent="updateProfile" enctype="multipart/form-data">
+                            <!-- Foto Profil -->
+                            <div class="mb-3 text-center">
+                                <img src="{{ asset('storage/profile/' . Auth::id() . '.jpg') }}"
+                                    onerror="this.src='{{ asset('assets/default.png') }}'" class="rounded-circle mb-3"
+                                    style="width:100px; height:100px; object-fit:cover;">
 
-                <div class="mb-3">
-                    <label class="form-label">Nama</label>
-                    <input type="text" class="form-control" wire:model="nama">
+                                <input type="file" class="form-control" wire:model="foto">
+                                @error('foto')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Nama</label>
+                                <input type="text" class="form-control" wire:model="nama">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" wire:model="email">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Alamat</label>
+                                <input type="text" class="form-control" wire:model="alamat">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">No WhatsApp</label>
+                                <input type="text" class="form-control" wire:model="telepon">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" wire:model="email">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Alamat</label>
-                    <input type="text" class="form-control" wire:model="alamat">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">No WhatsApp</label>
-                    <input type="text" class="form-control" wire:model="telepon">
-                </div>
-                <button type="submit" class="btn btn-primary">Simpan</button>
-            </form>
+            </div>
         </div>
-    </div>
-  </div>
-</div>
 
 
         <!-- Modal Ganti Password -->

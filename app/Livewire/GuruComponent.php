@@ -13,6 +13,8 @@ class GuruComponent extends Component
 
     public $nama, $nip, $alamat, $telepon, $email, $password;
     public $cari, $id;
+    public $selected = [];     // id guru yang dipilih
+    public $selectAll = false; // checkbox pilih semua
 
     public function render()
     {
@@ -80,5 +82,45 @@ class GuruComponent extends Component
             $guru->save();
             session()->flash('success', 'Akun guru berhasil dinonaktifkan.');
         }
+    }
+
+    public function cetakKartu()
+{
+    if (count($this->selected) == 0) {
+        session()->flash('error', 'Tidak ada guru yang dipilih.');
+        return;
+    }
+
+    session()->put('cetak_ids', $this->selected);
+    return redirect()->route('guru.kartu.cetak'); // pastikan route ini ada
+}
+
+
+    public function toggleSelectAll()
+    {
+        $idsDiHalaman = $this->getIdsDiHalaman();
+
+        if ($this->selectAll) {
+            // kalau dicentang -> pilih semua id guru di halaman ini
+            $this->selected = $idsDiHalaman;
+        } else {
+            // kalau di-uncheck -> kosongkan
+            $this->selected = [];
+        }
+    }
+
+    private function getIdsDiHalaman()
+    {
+        return User::where('status', 'disetujui')
+            ->where('jenis', 'guru')
+            ->orderBy('nama', 'asc')
+            ->paginate(10) // sesuai jumlah per halaman guru
+            ->pluck('id')
+            ->toArray();
+    }
+
+    public function updatingPage()
+    {
+        $this->reset(['selected', 'selectAll']);
     }
 }

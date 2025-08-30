@@ -51,8 +51,8 @@
 
         {{-- NIS & KELAS untuk Siswa --}}
         <div id="studentFields" style="{{ $jenis == 'siswa' ? '' : 'display: none;' }}">
-            <input type="text" wire:model="nis" placeholder="NIS" class="form-control">
-            @error('nis')
+            <input type="text" wire:model="nisn" placeholder="NISN" class="form-control">
+            @error('nisn')
                 <div class="alert alert-danger">{{ $message }}</div>
             @enderror
 

@@ -40,7 +40,9 @@
     <h2>{{ $judul }}</h2>
 
     @if($tanggalMulai && $tanggalAkhir)
-    <p>Periode: {{ $tanggalMulai }} - {{ $tanggalAkhir }}</p>
+     <p style="text-align: center; margin: 0; font-size: 12px;">
+        Periode: {{ $tanggalMulai }} - {{ $tanggalAkhir }}
+    </p>
 @endif
 
 

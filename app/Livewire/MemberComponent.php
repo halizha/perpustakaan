@@ -11,7 +11,7 @@ class MemberComponent extends Component
 {
     use WithPagination, WithoutUrlPagination;
     protected $paginationTheme = 'bootstrap';
-    public $nama, $telepon, $email, $alamat, $password, $cari, $id, $status, $nis, $nip, $kelas, $jenis;
+    public $nama, $telepon, $email, $alamat, $password, $cari, $id, $status, $nisn, $nip, $kelas, $jenis;
 
     public function render()
     {
@@ -63,14 +63,14 @@ class MemberComponent extends Component
     {
         $this->validate([
             'nama' => 'required',
-            'nis' => 'required',
+            'nisn' => 'required',
             'kelas' => 'required',
             'telepon' => 'required',
             'alamat' => 'required',
             'email' => 'required'
         ], [
             'nama.required' => 'Nama Lengkap Tidak Boleh Kosong!',
-            'nis.required' => 'NIS Tidak Boleh Kosong!',
+            'nisn.required' => 'NISN Tidak Boleh Kosong!',
             'kelas.required' => 'Kelas Tidak Boleh Kosong!',
             'telepon.required' => 'Telepon Tidak Boleh Kosong!',
             'alamat.required' => 'Alamat Tidak Boleh Kosong!',
@@ -79,7 +79,7 @@ class MemberComponent extends Component
 
         User::create([
             'nama' => $this->nama,
-            'nis' => $this->nis,
+            'nisn' => $this->nisn,
             'kelas' => $this->kelas,
             'alamat' => $this->alamat,
             'telepon' => $this->telepon,
@@ -98,7 +98,7 @@ class MemberComponent extends Component
         $member = User::find($id);
         $this->id = $member->id;
         $this->nama = $member->nama;
-        $this->nis = $member->nis;
+        $this->nisn = $member->nisn;
         $this->nip = $member->nip;
         $this->kelas = $member->kelas;
         $this->alamat = $member->alamat;
@@ -112,7 +112,7 @@ class MemberComponent extends Component
         $member = User::find($this->id);
         $member->update([
             'nama' => $this->nama,
-            'nis' => $this->nis,
+            'nisn' => $this->nisn,
             'kelas' => $this->kelas,
             'alamat' => $this->alamat,
             'telepon' => $this->telepon,

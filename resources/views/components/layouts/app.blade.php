@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{{ asset('assets/admin-dashboard.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
 
     <style>
         .sidebar {
@@ -62,7 +62,13 @@
             left: 10px;
             z-index: 101;
         }
-        
+        .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-dropdown {
+        z-index: 999999 !important;
+    }
     </style>
 </head>
 
@@ -86,37 +92,38 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
-    
+
+
     <script>
-    feather.replace();
+        feather.replace();
 
-    // === Toggle Sidebar (kalau kamu pakai) ===
-    document.querySelector('.menu-toggle')?.addEventListener('click', function () {
-        document.querySelector('.sidebar')?.classList.toggle('open');
-    });
-
-    // === Toggle ikon panah untuk menu Kelola Member ===
-    const submenu = document.getElementById('kelolaMemberSubmenu');
-    const arrowIcon = document.getElementById('arrowIconKelolaMember');
-
-    if (submenu && arrowIcon) {
-        submenu.addEventListener('show.bs.collapse', () => {
-            arrowIcon.setAttribute('data-feather', 'chevron-down'); // panah ke bawah
-            feather.replace();
+        // === Toggle Sidebar (kalau kamu pakai) ===
+        document.querySelector('.menu-toggle')?.addEventListener('click', function() {
+            document.querySelector('.sidebar')?.classList.toggle('open');
         });
 
-        submenu.addEventListener('hide.bs.collapse', () => {
-            arrowIcon.setAttribute('data-feather', 'chevron-right'); // panah ke kanan
-            feather.replace();
-        });
-    }
-</script>
+        // === Toggle ikon panah untuk menu Kelola Member ===
+        const submenu = document.getElementById('kelolaMemberSubmenu');
+        const arrowIcon = document.getElementById('arrowIconKelolaMember');
+
+        if (submenu && arrowIcon) {
+            submenu.addEventListener('show.bs.collapse', () => {
+                arrowIcon.setAttribute('data-feather', 'chevron-down'); // panah ke bawah
+                feather.replace();
+            });
+
+            submenu.addEventListener('hide.bs.collapse', () => {
+                arrowIcon.setAttribute('data-feather', 'chevron-right'); // panah ke kanan
+                feather.replace();
+            });
+        }
+    </script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
     @stack('scripts')
 

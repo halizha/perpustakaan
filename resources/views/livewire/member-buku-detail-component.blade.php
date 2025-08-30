@@ -50,9 +50,16 @@
                         <td>{{ $buku->jumlah }}</td>
                     </tr>
                     <tr>
-                        <th><strong>Kode Rak</strong></th>
-                        <td>{{ $buku->kode_rak }}</td>
-                    </tr>
+    <th><strong>Lokasi</strong></th>
+    <td>
+        @if ($buku->slot && $buku->slot->rak)
+            {{ $buku->slot->rak->kode_rak }} : {{ $buku->slot->rak->nama_rak }} -
+            {{ $buku->slot->kode_slot }} : {{ $buku->slot->nama_slot }}
+        @else
+            <span class="text-muted">Belum ditempatkan</span>
+        @endif
+    </td>
+</tr>
                     <tr>
                         <th><strong>Status</strong></th>
                         <td>

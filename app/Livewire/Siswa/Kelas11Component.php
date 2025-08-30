@@ -11,8 +11,53 @@ class Kelas11Component extends Component
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
 
-    public $nama, $nis, $kelas = 'XI.', $alamat, $telepon, $email, $password;
+    public $nama, $nisn, $kelas = 'XI.', $alamat, $telepon, $email, $password;
     public $cari, $id;
+
+    public $selected = [];
+    public $selectAll = false;
+
+
+    public function toggleSelectAll()
+    {
+        $idsDiHalaman = $this->getIdsDiHalaman();
+
+        if ($this->selectAll) {
+            // kalau udah dicentang -> pilih semua di halaman ini
+            $this->selected = $idsDiHalaman;
+        } else {
+            // kalau uncheck -> hapus semua
+            $this->selected = [];
+        }
+    }
+
+    private function getIdsDiHalaman()
+    {
+        return User::where('status', 'disetujui')
+            ->where('jenis', 'siswa')
+            ->whereRaw("REPLACE(UPPER(kelas), ' ', '') LIKE 'XI.%'")
+            ->orderByRaw("CAST(SUBSTRING_INDEX(kelas, '.', -1) AS UNSIGNED) ASC")
+            ->orderBy('nama', 'asc')
+            ->paginate(15)
+            ->pluck('id')
+            ->toArray();
+    }
+
+    public function updatingPage()
+    {
+        $this->reset(['selected', 'selectAll']);
+    }
+
+    public function cetakKartu()
+    {
+        if (count($this->selected) == 0) {
+            session()->flash('success', 'Tidak ada siswa yang dipilih.');
+            return;
+        }
+
+        session()->put('cetak_ids', $this->selected);
+        return redirect()->route('siswa.kartu.cetak');
+    }
 
     public function render()
     {
@@ -29,23 +74,21 @@ class Kelas11Component extends Component
             });
         }
 
-        // ✅ Urutkan dulu berdasarkan kelas, lalu nama
         $query->orderByRaw("CAST(SUBSTRING_INDEX(kelas, '.', -1) AS UNSIGNED) ASC")
             ->orderBy('nama', 'asc');
 
-        $data['siswaKelas11'] = $query->paginate(10);
+        $data['siswaKelas11'] = $query->paginate(15);
 
         $layout['title'] = 'Siswa Kelas 11';
         return view('livewire.siswa.kelas11-component', $data)
             ->layoutData($layout);
     }
 
-
     public function store()
     {
         $this->validate([
             'nama' => 'required|string|max:255',
-            'nis' => 'required|string|max:50|unique:users,nis',
+            'nisn' => 'required|string|max:50|unique:users,nisn',
             'kelas' => 'required|string|max:10',
             'alamat' => 'nullable|string',
             'telepon' => 'nullable|string|max:20',
@@ -53,23 +96,22 @@ class Kelas11Component extends Component
             'password' => 'required|string|min:6'
         ]);
 
-        // Format kelas (hapus spasi, kapitalisasi)
         $kelasFormatted = strtoupper(str_replace(' ', '', $this->kelas));
 
         User::create([
             'nama' => $this->nama,
-            'nis' => $this->nis,
+            'nisn' => $this->nisn,
             'kelas' => $kelasFormatted,
             'alamat' => $this->alamat,
             'telepon' => $this->telepon,
             'email' => $this->email,
             'status' => 'disetujui',
-            'akun' => 'aktif',   // ✅ default aktif
+            'akun' => 'aktif',
             'jenis' => 'siswa',
             'password' => bcrypt($this->password),
         ]);
 
-        $this->reset(['nama', 'nis', 'kelas', 'alamat', 'telepon', 'email', 'password']);
+        $this->reset(['nama', 'nisn', 'kelas', 'alamat', 'telepon', 'email', 'password']);
         $this->kelas = 'XI.';
 
         session()->flash('success', 'Siswa berhasil ditambahkan.');

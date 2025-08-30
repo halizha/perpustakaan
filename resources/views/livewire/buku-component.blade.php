@@ -63,6 +63,7 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        {{-- JUDUL --}}
                         <div class="form-group">
                             <label>Judul</label>
                             <input type="text" class="form-control" wire:model="judul" value="{{ old('judul') }}">
@@ -80,6 +81,7 @@
                             @enderror
                         </div>
 
+                        {{-- KATEGORI --}}
                         <div class="form-group">
                             <label>Kategori</label>
                             <select wire:model="kategori" class="form-control">
@@ -93,6 +95,7 @@
                             @enderror
                         </div>
 
+                        {{-- PENULIS --}}
                         <div class="form-group">
                             <label>Penulis</label>
                             <input type="text" class="form-control" wire:model="penulis"
@@ -102,6 +105,7 @@
                             @enderror
                         </div>
 
+                        {{-- PENERBIT --}}
                         <div class="form-group">
                             <label>Penerbit</label>
                             <input type="text" class="form-control" wire:model="penerbit"
@@ -111,6 +115,7 @@
                             @enderror
                         </div>
 
+                        {{-- ISBN --}}
                         <div class="form-group">
                             <label>ISBN</label>
                             <input type="text" class="form-control" wire:model="isbn" value="{{ old('isbn') }}">
@@ -119,6 +124,7 @@
                             @enderror
                         </div>
 
+                        {{-- TAHUN --}}
                         <div class="form-group">
                             <label>Tahun</label>
                             <input type="text" class="form-control" wire:model="tahun" value="{{ old('tahun') }}">
@@ -127,6 +133,7 @@
                             @enderror
                         </div>
 
+                        {{-- JUMLAH --}}
                         <div class="form-group">
                             <label>Jumlah</label>
                             <input type="text" class="form-control" wire:model="jumlah" value="{{ old('jumlah') }}">
@@ -136,11 +143,20 @@
                         </div>
 
                         {{-- KODE RAK --}}
-                        <div class="form-group">
+                        <div class="form-group" wire:ignore>
                             <label>Kode Rak</label>
-                            <input type="text" class="form-control" wire:model="kode_rak"
-                                value="{{ old('kode_rak') }}">
-                            @error('kode_rak')
+                            <select id="slotSelect" class="form-control" style="width: 100%">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($raks as $r)
+                                    @foreach ($r->slots as $s)
+                                        <option value="{{ $s->id_slot }}">
+                                            {{ $r->kode_rak }}:{{ $r->nama_rak }} -
+                                            {{ $s->kode_slot }}:{{ $s->nama_slot }}
+                                        </option>
+                                    @endforeach
+                                @endforeach
+                            </select>
+                            @error('slot_id')
                                 <small class="form-text text-danger">{{ $message }}</small>
                             @enderror
                         </div>
@@ -158,6 +174,7 @@
                             @enderror
                         </div>
 
+                        {{-- SAMPUL --}}
                         <div class="form-group">
                             <label>Sampul Buku</label>
                             <input type="file" class="form-control" wire:model="sampul">
@@ -166,8 +183,8 @@
                             @enderror
                         </div>
                     </form>
-
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="button" wire:click="store" class="btn btn-primary">Save</button>
@@ -175,6 +192,7 @@
             </div>
         </div>
     </div>
+
     {{-- Ubah --}}
     <div wire:ignore.self class="modal fade" id="editPage" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -265,11 +283,20 @@
                         </div>
 
                         {{-- KODE RAK --}}
-                        <div class="form-group">
+                        <div class="form-group" wire:ignore>
                             <label>Kode Rak</label>
-                            <input type="text" class="form-control" wire:model="kode_rak"
-                                value="{{ old('kode_rak') }}">
-                            @error('kode_rak')
+                            <select class="form-control slotSelect" style="width: 100%">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($raks as $r)
+                                    @foreach ($r->slots as $s)
+                                        <option value="{{ $s->id_slot }}">
+                                            {{ $r->kode_rak }}:{{ $r->nama_rak }} -
+                                            {{ $s->kode_slot }}:{{ $s->nama_slot }}
+                                        </option>
+                                    @endforeach
+                                @endforeach
+                            </select>
+                            @error('slot_id')
                                 <small class="form-text text-danger">{{ $message }}</small>
                             @enderror
                         </div>
@@ -303,6 +330,7 @@
             </div>
         </div>
     </div>
+
     {{-- Delete --}}
     <div wire:ignore.self class="modal fade" id="deletePage" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -326,3 +354,68 @@
         </div>
     </div>
 </div>
+
+{{-- skript tambah --}}
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // Inisialisasi Select2 dengan parent tepat di dalam modal
+            $('#slotSelect').select2({
+                placeholder: '-- Pilih --',
+                dropdownParent: $('#addPage .modal-content'), // FIX: supaya posisinya pas
+                allowClear: true,
+                width: '100%'
+            }).on('change', function() {
+                let selectedSlot = $(this).val();
+                @this.set('slot_id', selectedSlot);
+            });
+
+            // Reset dropdown kalau Livewire reset property
+            Livewire.on('resetSlotSelect', () => {
+                $('#slotSelect').val('').trigger('change');
+            });
+        });
+    </script>
+@endpush
+
+{{-- skript ubah --}}
+@push('scripts')
+    <script>
+        function initSelect2(modalId) {
+            $(modalId + ' .slotSelect').select2({
+                placeholder: '-- Pilih --',
+                dropdownParent: $(modalId + ' .modal-content'),
+                allowClear: true,
+                width: '100%'
+            }).on('change', function() {
+                let selectedSlot = $(this).val();
+                @this.set('slot_id', selectedSlot);
+            });
+        }
+
+        $(document).ready(function() {
+            // Init Select2 setiap kali modal ditampilkan
+            $('#addPage').on('shown.bs.modal', function() {
+                initSelect2('#addPage');
+            });
+
+            $('#editPage').on('shown.bs.modal', function() {
+                initSelect2('#editPage');
+            });
+
+            // Reset saat Livewire trigger
+            Livewire.on('resetSlotSelect', () => {
+                $('.slotSelect').val('').trigger('change');
+            });
+        });
+    </script>
+@endpush
+
+@push('styles')
+    <style>
+        /* Fix posisi dropdown select2 di atas modal */
+        .select2-container {
+            z-index: 2000 !important;
+        }
+    </style>
+@endpush
