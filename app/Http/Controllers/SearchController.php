@@ -25,17 +25,42 @@ class SearchController extends Controller
 
         return response()->json($result);
     }
+
+    public function searchKodeBuku(Request $request)
+    {
+        $bukuId = $request->buku_id;
+        $search = $request->q;
+
+        $eksemplar = \App\Models\EksemplarBuku::where('buku_id', $bukuId)
+            ->where('status', 'tersedia') // ✅ cuma yang bisa dipinjam
+            ->when($search, fn($q) => $q->where('kode_eksemplar', 'like', "%{$search}%"))
+            ->get();
+
+        return response()->json(
+            $eksemplar->map(fn($e) => [
+                'id' => $e->id,
+                'text' => $e->kode_eksemplar
+            ])
+        );
+    }
+
     public function searchMember(Request $request)
     {
         $search = $request->get('q');
 
-        $data = User::where('jenis', 'siswa')
-            ->where('akun', 'aktif') // 🔥 hanya tampilkan yang aktif
+        $data = User::whereIn('jenis', ['siswa', 'guru']) // siswa & guru boleh pinjam
+            ->where('akun', 'aktif')
             ->when($search, function ($query, $search) {
                 return $query->where('nama', 'like', '%' . $search . '%');
             })
-            ->select('id', 'nama as text')
-            ->get();
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'text' => $user->nama,
+                    'kelas' => $user->jenis === 'siswa' ? $user->kelas : '-', // kalau guru jadi '-'
+                ];
+            });
 
         return response()->json($data);
     }

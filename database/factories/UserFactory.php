@@ -11,16 +11,16 @@ class UserFactory extends Factory
     {
         return [
             'nama' => $this->faker->name(),
-            'nisn' => $this->faker->unique()->numerify('DUMMY####'),
-            'kelas' => $this->faker->randomElement(['XI.1', 'XI.2', 'XI.3', 'XI.4']),
+            'nisn' => null,
+            'kelas' => null,
             'alamat' => $this->faker->address(),
             'telepon' => $this->faker->phoneNumber(),
             'email' => $this->faker->unique()->safeEmail(),
             'password' => bcrypt('password123'), // biar gampang login
-            'jenis' => 'siswa',
+            'jenis' => 'guru',
             'status' => 'disetujui',
             'akun' => 'aktif',
-            'nip' => null,
+            'nip' => $this->faker->unique()->numerify('DUMMY####'),
             'remember_token' => Str::random(10),
         ];
     }

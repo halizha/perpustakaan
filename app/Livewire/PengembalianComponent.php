@@ -20,6 +20,9 @@ class PengembalianComponent extends Component
     public $detail_pinjam_id, $pinjam_id;
     public $cariPinjam = '';
     public $cariPengembalian = '';
+    public $statusEksemplar = 'tersedia'; // default
+    public $dendaManual = null; // untuk input manual
+
 
     public function render()
     {
@@ -41,13 +44,13 @@ class PengembalianComponent extends Component
     // Ketika tombol "Pilih" ditekan
     public function pilih($detailId)
     {
-        $detail = DetailPinjam::with('buku', 'pinjam.user')->find($detailId);
+        $detail = DetailPinjam::with('buku', 'pinjam.user', 'eksemplar')->find($detailId);
         $this->detail_pinjam_id = $detail->id;
 
         $this->judul = $detail->buku->judul ?? 'Tidak ditemukan';
         $this->member = $detail->pinjam->user->nama ?? 'Tidak ditemukan';
-        $this->tgl_kembali = $detail->pinjam->tgl_kembali;
-        $this->id = $detail->pinjam->id; // ini adalah id dari tabel pinjam (digunakan untuk pengembalian)
+        $this->tgl_kembali = $detail->tgl_kembali;
+        $this->id = $detail->pinjam->id;
 
         $jatuhTempo = new DateTime($this->tgl_kembali);
         $hariIni = new DateTime();
@@ -55,50 +58,92 @@ class PengembalianComponent extends Component
 
         $this->status = $hariIni > $jatuhTempo;
         $this->lama = $this->status ? $selisih->days : 0;
+
+        // default
+        $this->statusEksemplar = 'tersedia';
+        $this->dendaManual = null;
     }
+
 
     // Fungsi simpan pengembalian
-    public function store()
-    {
-        $this->validate([
-            'detail_pinjam_id' => 'required',
-            'tgl_kembali' => 'required|date',
-            'denda' => 'nullable|numeric',
-        ]);
 
-        $detail = DetailPinjam::find($this->detail_pinjam_id);
+public function store()
+{
+    // Validasi dasar
+    $rules = [
+        'detail_pinjam_id' => 'required',
+        'tgl_kembali'      => 'required|date',
+    ];
 
-        if (!$detail) {
-            session()->flash('error', 'Detail pinjam tidak ditemukan.');
-            return;
-        }
-
-        Pengembalian::create([
-            'pinjam_id' => $detail->pinjam_id,
-            'detail_pinjam_id' => $this->detail_pinjam_id,
-            'tgl_kembali' => $this->tgl_kembali,
-            'denda' => $this->denda ?? 0,
-        ]);
-
-        // *** Tambahan untuk balikin stok buku ***
-        $buku = $detail->buku;
-        $buku->increment('jumlah');
-        if ($buku->jumlah > 0) {
-            $buku->status = 'tersedia';
-            $buku->save();
-        }
-        $pinjamId = $detail->pinjam_id;
-        $totalBuku = DetailPinjam::where('pinjam_id', $pinjamId)->pluck('id')->toArray();
-        $bukuDikembalikan = Pengembalian::where('pinjam_id', $pinjamId)->pluck('detail_pinjam_id')->toArray();
-
-        // Kalau semua ID detail pinjam sudah ada di tabel pengembalian
-        if (empty(array_diff($totalBuku, $bukuDikembalikan))) {
-            $detail->pinjam->update(['status' => 'kembali']);
-        }
-
-
-        $this->reset(['detail_pinjam_id', 'tgl_kembali', 'denda']);
-        session()->flash('success', 'Pengembalian berhasil disimpan.');
-        return redirect()->route('pengembalian');
+    // Kalau status hilang/rusak → wajib isi denda manual
+    if (in_array($this->statusEksemplar, ['hilang', 'rusak'])) {
+        $rules['dendaManual'] = 'required|numeric|min:1';
     }
+
+    $this->validate($rules);
+
+    $detail = DetailPinjam::with(['eksemplar', 'buku'])->find($this->detail_pinjam_id);
+
+    if (!$detail) {
+        session()->flash('error', 'Detail pinjam tidak ditemukan.');
+        return;
+    }
+
+    // ✅ Tentukan jumlah denda
+    if ($this->statusEksemplar === 'tersedia') {
+        $denda = $this->status ? $this->lama * 500 : 0;
+    } else {
+        $denda = $this->dendaManual ?? 0;
+    }
+
+    // ✅ Simpan data pengembalian
+    Pengembalian::create([
+        'pinjam_id'        => $detail->pinjam_id,
+        'detail_pinjam_id' => $detail->id,
+        'tgl_kembali'      => now(),
+        'denda'            => $denda,
+    ]);
+
+    // ✅ Update status eksemplar
+    if ($detail->eksemplar) {
+        $detail->eksemplar->update([
+            'status' => $this->statusEksemplar === 'tersedia' ? 'tersedia' : $this->statusEksemplar
+        ]);
+    }
+
+    // ✅ Update stok buku
+    if ($detail->buku) {
+        $buku = $detail->buku;
+        $buku->jumlah = $buku->eksemplars()->where('status', 'tersedia')->count();
+        $buku->status = $buku->jumlah > 0 ? 'tersedia' : 'habis';
+        $buku->save();
+    }
+
+    // ✅ Update status pinjam kalau semua buku sudah kembali
+    $pinjamId = $detail->pinjam_id;
+    $totalBuku = DetailPinjam::where('pinjam_id', $pinjamId)->pluck('id')->toArray();
+    $bukuDikembalikan = Pengembalian::where('pinjam_id', $pinjamId)->pluck('detail_pinjam_id')->toArray();
+
+    if (empty(array_diff($totalBuku, $bukuDikembalikan))) {
+        $pinjam = Pinjam::find($pinjamId);
+        if ($pinjam) {
+            $pinjam->update(['status' => 'kembali']);
+        }
+    }
+
+    // ✅ Reset form
+    $this->reset([
+        'detail_pinjam_id', 
+        'tgl_kembali', 
+        'dendaManual', 
+        'statusEksemplar',
+        'lama',
+        'status',
+    ]);
+
+    session()->flash('success', 'Pengembalian berhasil disimpan.');
+    return redirect()->route('pengembalian');
+}
+
+
 }

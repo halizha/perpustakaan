@@ -95,11 +95,12 @@
 
                         {{-- Menu admin lainnya --}}
                         <li class="nav-item">
-                            <a class="nav-link {{ Route::currentRouteName() == 'buku' ? 'active' : '' }}"
+                            <a class="nav-link {{ Route::currentRouteName() == 'buku' || Route::currentRouteName() == 'buku.eksemplar' ? 'active' : '' }}"
                                 href="{{ route('buku') }}">
                                 <i data-feather="book-open"></i> Kelola Buku
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link {{ Str::startsWith(Route::currentRouteName(), 'pinjam') ? 'active' : '' }}"
                                 href="{{ route('pinjam') }}">

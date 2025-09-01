@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Buku;
+use App\Models\EksemplarBuku;
 use App\Models\Kategori;
 use App\Models\Rak;
 use App\Models\Slot;
@@ -19,7 +20,7 @@ class BukuComponent extends Component
 
     // form fields
     public $kategori, $judul, $penulis, $penerbit, $isbn, $tahun, $jumlah, $cari;
-    public $id, $sampul, $sinopsis, $slot_id, $status;
+    public $id, $sampul, $sinopsis, $slot_id, $status, $kode_buku;
 
     public function render()
     {
@@ -51,24 +52,13 @@ class BukuComponent extends Component
             'penerbit' => 'required',
             'tahun' => 'required',
             'isbn' => 'required',
-            'jumlah' => 'required',
+            'jumlah' => 'required|integer|min:1',
             'sampul' => 'required|image|max:2048',
             'slot_id' => 'required|exists:slot,id_slot',
-            'status' => 'required',
             'sinopsis' => 'required',
-        ], [
-            'judul.required' => 'Judul Lengkap Tidak Boleh Kosong!',
-            'kategori.required' => 'Kategori Tidak Boleh Kosong!',
-            'penulis.required' => 'Penulis Tidak Boleh Kosong!',
-            'penerbit.required' => 'Penerbit Tidak Boleh Kosong!',
-            'tahun.required' => 'Tahun Tidak Boleh Kosong!',
-            'isbn.required' => 'ISBN Tidak Boleh Kosong!',
-            'jumlah.required' => 'Jumlah Tidak Boleh Kosong!',
-            'sampul.max' => 'Ukuran gambar maksimal 2MB!',
-            'slot_id.required' => 'Slot tidak boleh kosong',
-            'slot_id.exists' => 'Slot tidak valid',
-            'status.required' => 'Status Tidak Boleh Kosong',
-            'sinopsis.required' => 'Sinopsis Tidak Boleh Kosong'
+            'kode_buku' => 'required|string|unique:bukus,kode_buku',
+
+            // status validasi bisa di-skip, nanti dihapus sekalian pas drop kolom status
         ]);
 
         $sampulPath = null;
@@ -76,22 +66,50 @@ class BukuComponent extends Component
             $sampulPath = $this->sampul->store('sampul', 'public');
         }
 
-        Buku::create([
-            'judul' => $this->judul,
+        // simpan buku dulu
+        $buku = Buku::create([
+            'kode_buku'   => $this->kode_buku, // ⬅️ pastikan ada input kode_buku di form
+            'judul'       => $this->judul,
             'kategori_id' => $this->kategori,
-            'penulis' => $this->penulis,
-            'penerbit' => $this->penerbit,
-            'tahun' => $this->tahun,
-            'isbn' => $this->isbn,
-            'jumlah' => $this->jumlah,
-            'slot_id' => $this->slot_id,
-            'status' => $this->status,
-            'sinopsis' => $this->sinopsis,
-            'sampul' => $sampulPath,
+            'penulis'     => $this->penulis,
+            'penerbit'    => $this->penerbit,
+            'tahun'       => $this->tahun,
+            'isbn'        => $this->isbn,
+            'jumlah'      => $this->jumlah,
+            'slot_id'     => $this->slot_id,
+            'sinopsis'    => $this->sinopsis,
+            'sampul'      => $sampulPath,
+            'status'      => 'Tersedia', // sementara, nanti bisa dihapus
         ]);
 
-        $this->reset(['kategori', 'judul', 'penulis', 'penerbit', 'isbn', 'tahun', 'jumlah', 'sampul', 'slot_id', 'status', 'sinopsis', 'id']);
-        session()->flash('success', 'Berhasil Simpan!');
+        // generate eksemplar sesuai jumlah
+        for ($i = 1; $i <= (int) $buku->jumlah; $i++) {
+            $kodeEksemplar = $buku->kode_buku . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+
+            EksemplarBuku::create([
+                'buku_id'        => $buku->id,
+                'kode_eksemplar' => $kodeEksemplar,
+                'status'         => 'Tersedia',
+            ]);
+        }
+
+        $this->reset([
+            'kategori',
+            'judul',
+            'penulis',
+            'penerbit',
+            'isbn',
+            'tahun',
+            'jumlah',
+            'sampul',
+            'slot_id',
+            'status',
+            'sinopsis',
+            'id',
+            'kode_buku'
+        ]);
+
+        session()->flash('success', 'Buku & eksemplar berhasil ditambahkan!');
         return redirect()->route('buku');
     }
 
@@ -111,6 +129,9 @@ class BukuComponent extends Component
         $this->slot_id = $buku->slot_id; // penting
         $this->sinopsis = $buku->sinopsis;
         $this->status = $buku->status;
+
+        $this->dispatch('refreshKategoriSelect');
+
     }
 
     public function update()

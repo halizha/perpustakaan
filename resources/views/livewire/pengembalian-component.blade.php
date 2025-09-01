@@ -31,7 +31,7 @@
                                         <td>{{ $detail->buku->judul ?? '-' }}</td>
                                         <td>{{ \Carbon\Carbon::parse($detail->pinjam->tgl_pinjam)->format('d-m-Y H:i') }}
                                         </td>
-                                        <td>{{ \Carbon\Carbon::parse($detail->pinjam->tgl_kembali)->format('d-m-Y') }}
+                                        <td>{{ \Carbon\Carbon::parse($detail->tgl_kembali)->format('d-m-Y') }}
                                         </td>
 
                                         <td>
@@ -50,7 +50,6 @@
         @endif
     </div>
 
-
     <div class="card">
         <div class="card-header bg-primary text-white">
             Daftar Buku Dikembalikan
@@ -65,10 +64,9 @@
                             <th scope="col">No</th>
                             <th scope="col">Nama Lengkap</th>
                             <th scope="col">Judul Buku</th>
-                            <th scope="col">Tanggal Pinjam</th>
-                            <th scope="col">Tanggal Kembali</th>
+                            <th scope="col">Tanggal Kembali</th> {{-- dari detail_pinjam --}}
+                            <th scope="col">Tanggal Dikembalikan</th> {{-- dari pengembalian --}}
                             <th scope="col">Denda</th>
-
                         </tr>
                     </thead>
                     <tbody>
@@ -81,14 +79,22 @@
                                 <td>{{ $no++ }}</td>
                                 <td>{{ $data->pinjam?->user?->nama ?? '_' }}</td>
                                 <td>{{ $data->detail?->buku?->judul ?? '-' }}</td>
-                                <td>{{ \Carbon\Carbon::parse($data->pinjam?->tgl_pinjam)->format('d-m-Y H:i') ?? '-' }}
+
+                                {{-- Tanggal Kembali (jatuh tempo) dari detail_pinjam --}}
+                                <td>
+                                    {{ $data->detail?->tgl_kembali ? \Carbon\Carbon::parse($data->detail->tgl_kembali)->format('d-m-Y') : '-' }}
                                 </td>
-                                <td>{{ \Carbon\Carbon::parse($data->tgl_kembali)->format('d-m-Y') ?? '-' }}</td>
+
+                                {{-- Tanggal Dikembalikan (real) dari pengembalian --}}
+                                <td>
+                                    {{ $data->tgl_kembali ? \Carbon\Carbon::parse($data->tgl_kembali)->format('d-m-Y') : '-' }}
+                                </td>
+
                                 <td>{{ $data->denda ?? 0 }}</td>
                             </tr>
                         @endforeach
-
                     </tbody>
+
                 </table>
                 {{ $pengembalian->links() }}
             </div>
@@ -96,82 +102,89 @@
     </div>
 
     <div wire:ignore.self class="modal fade" id="pilih" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Form Pengembalian Buku</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Form Pengembalian Buku</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                {{-- Info buku --}}
+                <div class="row mb-3">
+                    <div class="col-md-4">Judul Buku</div>
+                    <div class="col-md-8">: {{ $judul }}</div>
                 </div>
-                <div class="modal-body">
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            Judul Buku
-                        </div>
-                        <div class="col-md-8">
-                            : {{ $judul }}
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            Nama Lengkap
-                        </div>
-                        <div class="col-md-8">
-                            : {{ $member }}
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            Tanggal Kembali
-                        </div>
-                        <div class="col-md-8">
-                            : {{ \Carbon\Carbon::parse($tgl_kembali)->format('d-m-Y') }}
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            Tanggal Dikembalikan
-                        </div>
-                        <div class="col-md-8">
-                            : {{ \Carbon\Carbon::now()->format('d-m-Y') }}
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            Denda
-                        </div>
-                        <div class="col-md-8">
-                            : @if ($this->status == true)
-                                Ya
-                            @else
-                                Tidak
-                            @endif
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            Lama Terlambat
-                        </div>
-                        <div class="col-md-8">
-                            : {{ $lama }} Hari
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            Jumlah Denda
-                        </div>
-                        <div class="col-md-8">
-                            : {{ $status * 500 }}
-                        </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">Nama Lengkap</div>
+                    <div class="col-md-8">: {{ $member }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">Tanggal Kembali</div>
+                    <div class="col-md-8">: {{ \Carbon\Carbon::parse($tgl_kembali)->format('d-m-Y') }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">Tanggal Dikembalikan</div>
+                    <div class="col-md-8">: {{ \Carbon\Carbon::now()->format('d-m-Y') }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">Lama Terlambat</div>
+                    <div class="col-md-8">: {{ $lama }} Hari</div>
+                </div>
+                
+
+                {{-- Dropdown status eksemplar --}}
+                <div class="row mb-3">
+                    <div class="col-md-4">Status Buku</div>
+                    <div class="col-md-8">
+                        <select wire:model="statusEksemplar" class="form-control">
+                            <option value="tersedia">Dikembalikan</option>
+                            <option value="hilang">Hilang</option>
+                            <option value="rusak">Rusak</option>
+                        </select>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" wire:click="store" class="btn btn-primary">Save</button>
-                </div>
+
+                {{-- Denda --}}
+<div class="row mb-3">
+    <div class="col-md-4">Denda</div>
+    <div class="col-md-8">
+        : 
+        @if ($statusEksemplar === 'hilang' || $statusEksemplar === 'rusak')
+            Ya
+        @else
+            {{ $status ? 'Ya' : 'Tidak' }}
+        @endif
+    </div>
+</div>
+
+{{-- Jumlah Denda --}}
+<div class="row mb-3">
+    <div class="col-md-4">Jumlah Denda</div>
+    <div class="col-md-8">
+        @if ($statusEksemplar === 'hilang' || $statusEksemplar === 'rusak')
+            <input type="number" wire:model="dendaManual" class="form-control"
+                   placeholder="Isi nominal denda manual">
+            @error('dendaManual') 
+                <small class="text-danger">{{ $message }}</small>
+            @enderror
+        @else
+            : {{ $status ? $lama * 500 : 0 }}
+        @endif
+    </div>
+</div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" wire:click="store" class="btn btn-primary">Save</button>
             </div>
         </div>
     </div>
+</div>
+
 </div>

@@ -10,7 +10,7 @@ class DetailPinjam extends Model
     use HasFactory;
     protected $table = 'detail_pinjam';
     protected $primaryKey = 'id';
-    protected $fillable = ['id', 'pinjam_id', 'buku_id'];
+    protected $fillable = ['id', 'pinjam_id', 'buku_id', 'eksemplar_id', 'kode_eksemplar', 'tgl_kembali',];
 
     public function pinjam()
     {
@@ -25,5 +25,10 @@ class DetailPinjam extends Model
     public function pengembalian()
     {
         return $this->hasOne(Pengembalian::class, 'detail_pinjam_id');
+    }
+
+    public function eksemplar()
+    {
+        return $this->belongsTo(EksemplarBuku::class, 'eksemplar_id');
     }
 }

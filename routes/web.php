@@ -75,6 +75,7 @@ Route::get('/guru', GuruComponent::class)->name('guru');
 
 Route::get('/kategori', KategoriComponent::class)->name('kategori')->middleware('auth');
 Route::get('/buku', BukuComponent::class)->name('buku')->middleware('auth');
+Route::get('/buku/{bukuId}/eksemplar', \App\Livewire\EksemplarBukuComponent::class)->name('buku.eksemplar');
 
 Route::get('/rak', LivewireRakComponent::class)->name('rak')->middleware('auth');
 Route::get('/rak/{id}/detail', SlotComponent::class)->name('rak.detail');
@@ -93,6 +94,7 @@ Route::get('/login', LoginComponent::class)->name('login');
 Route::get('/logout', LoginComponent::class, 'keluar')->name('logout');
 
 Route::get('/search-buku', [SearchController::class, 'searchBuku'])->name('search.buku');
+Route::get('/search-kode-buku', [SearchController::class, 'searchKodeBuku'])->name('search.kode.buku');
 Route::get('/search-member', [SearchController::class, 'searchMember'])->name('search.member');
 
 Route::get('/riwayat', RiwayatComponent::class)->name('riwayat')->middleware('auth');

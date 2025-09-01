@@ -75,16 +75,24 @@
                             @enderror
                         </div>
                         <div class="form-group">
+                            <label>Kelas</label>
+                            <input type="text" wire:model="kelas" id="kelas-input" class="form-control" readonly>
+                        </div>
+
+                        {{-- Pilih Judul Buku --}}
+                        {{-- Pilih Judul Buku --}}
+                        <div class="form-group">
                             <label>Judul Buku</label>
                             <div wire:ignore>
-                                <select id="select-buku" class="form-control" multiple="multiple" style="width: 100%">
-                                    <option value="">--Cari Buku--</option>
+                                <select id="select-buku" class="form-control" multiple style="width: 100%">
                                 </select>
                             </div>
-                            @error('buku')
-                                <small class="form-text text-danger">{{ $message }}</small>
-                            @enderror
                         </div>
+
+                        {{-- Tempat muncul kode buku per judul --}}
+                        <div id="kode-container" wire:ignore></div>
+
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -94,6 +102,7 @@
             </div>
         </div>
     </div>
+
     {{-- Ubah --}}
     <div wire:ignore.self class="modal fade" id="editPage" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -140,6 +149,7 @@
             </div>
         </div>
     </div>
+
     {{-- Delete --}}
     <div wire:ignore.self class="modal fade" id="deletePage" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -168,35 +178,86 @@
     <script>
         $(document).ready(function() {
             // Select2 Buku (sudah benar)
-            $('#select-buku').select2({
-                placeholder: '--Cari Buku--',
-                dropdownParent: $('#addPage'), // ⬅ ini penting
-                ajax: {
-                    url: '{{ url('/search-buku') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            q: params.term
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data
-                        };
-                    },
-                    cache: true
-                }
-            }).on('change', function() {
-                let selectedBuku = $(this).val() || [];
-                @this.set('buku', selectedBuku);
+            // Judul Buku
+            // Select2 Judul Buku
+            $(document).ready(function() {
+                // Judul Buku (multi select)
+                $('#select-buku').select2({
+                    placeholder: '--Cari Buku--',
+                    dropdownParent: $('#addPage'),
+                    ajax: {
+                        url: '{{ route('search.buku') }}',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                q: params.term
+                            };
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data
+                            };
+                        },
+                        cache: true
+                    }
+                }).on('change', function() {
+                    let selectedBooks = $(this).select2('data'); // ambil data judul yang dipilih
+                    @this.set('buku', selectedBooks.map(b => b.id));
+
+                    // Hapus semua dropdown kode lama
+                    $('#kode-container').html('');
+
+                    // Buat dropdown kode untuk setiap judul
+                    selectedBooks.forEach(function(book) {
+                        let kodeSelectId = 'select-kode-' + book.id;
+
+                        // Tambah HTML select ke container
+                        $('#kode-container').append(`
+                <div class="form-group">
+                    <label>Kode Buku untuk <b>${book.text}</b></label>
+                    <select id="${kodeSelectId}" class="form-control" style="width: 100%"></select>
+                </div>
+            `);
+
+                        // Init Select2 untuk kode buku
+                        $('#' + kodeSelectId).select2({
+                            placeholder: '--Pilih Kode Buku--',
+                            dropdownParent: $('#addPage'),
+                            ajax: {
+                                url: '{{ route('search.kode.buku') }}',
+                                dataType: 'json',
+                                delay: 250,
+                                data: function(params) {
+                                    return {
+                                        q: params.term,
+                                        buku_id: book.id
+                                    };
+                                },
+                                processResults: function(data) {
+                                    return {
+                                        results: data
+                                    };
+                                },
+                                cache: true
+                            }
+                        }).on('change', function() {
+                            let kodeId = $(this).val();
+                             @this.set('kodePerBuku.' + book.id, kodeId); // 🔥 fungsi Livewire custom
+                        });
+                    });
+                });
             });
+
+
+
+
 
             $('#select-member').select2({
                 placeholder: '--Cari Member--',
-                dropdownParent: $('#addPage'), // ⬅ ini juga
+                dropdownParent: $('#addPage'),
                 ajax: {
-                    url: '{{ url('/search-member') }}',
+                    url: '{{ route('search.member') }}', // rute lo udah bener
                     dataType: 'json',
                     delay: 250,
                     data: function(params) {
@@ -211,10 +272,13 @@
                     },
                     cache: true
                 }
-            }).on('change', function() {
-                let selectedMember = $(this).val();
-                @this.set('user', selectedMember);
+            }).on('select2:select', function(e) {
+                let data = e.params.data;
+                $('#kelas-input').val(data.kelas); // ⬅️ otomatis isi kelas ke input
+                @this.set('user', data.id);
+                @this.set('kelas', data.kelas);
             });
+
         });
     </script>
 @endpush

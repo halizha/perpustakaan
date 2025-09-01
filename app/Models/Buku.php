@@ -13,7 +13,7 @@ class Buku extends Model
 
     protected $table = 'bukus';
     protected $primaryKey = 'id';
-    protected $fillable = ['id', 'kategori_id', 'judul', 'penulis', 'penerbit', 'isbn', 'tahun', 'jumlah', 'sampul', 'kode_rak', 'sinopsis', 'status', 'slot_id'];
+    protected $fillable = ['id', 'kategori_id', 'judul', 'penulis', 'penerbit', 'isbn', 'tahun', 'jumlah', 'sampul', 'kode_rak', 'sinopsis', 'status', 'slot_id', 'kode_buku'];
 
     public function kategori(): BelongsTo
     {
@@ -28,5 +28,10 @@ class Buku extends Model
     public function slot()
     {
         return $this->belongsTo(Slot::class, 'slot_id', 'id_slot');
+    }
+
+    public function eksemplars()
+    {
+        return $this->hasMany(EksemplarBuku::class, 'buku_id');
     }
 }

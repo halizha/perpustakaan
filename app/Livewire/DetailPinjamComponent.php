@@ -10,13 +10,17 @@ class DetailPinjamComponent extends Component
 {
     public $pinjamId;
     public $pinjam;
-    public $editId, $editKeterangan;
+    public $editId, $editTglKembali;
     public $deleteId;
 
     public function mount($id)
     {
         $this->pinjamId = $id;
-        $this->pinjam = Pinjam::with(['user', 'detail.buku'])->findOrFail($id);
+        $this->pinjam = Pinjam::with([
+            'user',
+            'detail.buku',
+            'detail.eksemplar'
+        ])->findOrFail($id);
     }
 
     public function render()
@@ -30,24 +34,26 @@ class DetailPinjamComponent extends Component
     {
         $detail = DetailPinjam::findOrFail($id);
         $this->editId = $detail->id;
-        $this->editKeterangan = $detail->keterangan;
+        $this->editTglKembali = $detail->tgl_kembali
+            ? \Carbon\Carbon::parse($detail->tgl_kembali)->format('Y-m-d')
+            : null;
     }
 
     public function update()
-    {
-        $this->validate([
-            'editKeterangan' => 'required|string'
-        ]);
+{
+    $this->validate([
+        'editTglKembali' => 'required|date',
+    ]);
 
-        $detail = DetailPinjam::findOrFail($this->editId);
-        $detail->keterangan = $this->editKeterangan;
-        $detail->save();
+    $detail = DetailPinjam::findOrFail($this->editId);
+    $detail->tgl_kembali = $this->editTglKembali;
+    $detail->save();
 
-        session()->flash('success', 'Data berhasil diperbarui.');
-        $this->reset(['editId', 'editKeterangan']);
-        $this->mount($this->pinjamId); // refresh data
-        $this->dispatch('close-modal', 'editPage');
-    }
+    return redirect()
+        ->route('pinjam.detail', $this->pinjamId) // ganti sesuai route
+        ->with('success', 'Tanggal kembali berhasil diperbarui.');
+}
+
 
     public function confirm($id)
     {

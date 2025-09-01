@@ -1,15 +1,14 @@
 <div>
+    @if (session()->has('success'))
+        <div class="alert alert-success" role="alert">
+            {{ session('success') }}
+        </div>
+    @endif
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">Detail Peminjaman</h5>
         </div>
         <div class="card-body">
-            @if (session()->has('success'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('success') }}
-                </div>
-            @endif
-
             <div class="mb-3">
                 <div class="d-flex mb-2">
                     <strong class="me-3" style="min-width: 150px;">Nama Peminjam:</strong>
@@ -35,7 +34,8 @@
                     <tr>
                         <th>No</th>
                         <th>Judul Buku</th>
-                        
+                        <th>Kode Eksemplar</th>
+                        <th>Tanggal Kembali</th> {{-- ✅ kolom baru --}}
                         <th style="width: 160px;">Aksi</th>
                     </tr>
                 </thead>
@@ -44,7 +44,10 @@
                         <tr>
                             <td>{{ $i + 1 }}</td>
                             <td>{{ $d->buku->judul ?? '-' }}</td>
-                            
+                            <td>{{ $d->eksemplar->kode_eksemplar ?? '-' }}</td>
+                            <td>
+                                {{ $d->tgl_kembali ? \Carbon\Carbon::parse($d->tgl_kembali)->format('d-m-Y') : '-' }}
+                            </td>
                             <td>
                                 <button wire:click="edit({{ $d->id }})" class="btn btn-sm btn-outline-info"
                                     data-toggle="modal" data-target="#editPage">Ubah</button>
@@ -68,13 +71,13 @@
             <form wire:submit.prevent="update">
                 <div class="modal-content">
                     <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title">Ubah Keterangan</h5>
+                        <h5 class="modal-title">Ubah Tanggal Kembali</h5>
                         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label>Keterangan</label>
-                            <input type="text" class="form-control" wire:model="editKeterangan">
+                            <label>Tanggal Kembali</label>
+                            <input type="date" class="form-control" wire:model="editTglKembali">
                         </div>
                     </div>
                     <div class="modal-footer">

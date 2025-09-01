@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Buku;
 use App\Models\DetailPinjam;
+use App\Models\EksemplarBuku;
 use App\Models\Pinjam;
 use App\Models\User;
 use Carbon\Carbon;
@@ -15,8 +16,9 @@ class PinjamComponent extends Component
 {
     use WithPagination, WithoutUrlPagination;
     protected $paginationTheme = 'bootstrap';
-    public $id, $user, $tgl_pinjam, $tgl_kembali, $cari;
+    public $id, $user, $tgl_pinjam, $tgl_kembali, $cari, $kelas;
     public $buku = []; // awalnya string, sekarang array
+    public $kodePerBuku = [];
 
     public function render()
     {
@@ -37,50 +39,75 @@ class PinjamComponent extends Component
 
     public function store()
     {
-
         $this->validate([
             'buku' => 'required|array|min:1',
             'user' => 'required',
+            'kodePerBuku' => 'array',
         ], [
             'buku.required' => 'Pilih minimal satu buku!',
             'user.required' => 'Member wajib dipilih!',
         ]);
 
+        // cek semua buku wajib punya eksemplar
+        foreach ($this->buku as $bukuId) {
+            if (empty($this->kodePerBuku[$bukuId])) {
+                session()->flash('error', 'Pilih kode eksemplar untuk semua buku yang dipilih.');
+                return;
+            }
+        }
+
         $this->tgl_pinjam = Carbon::now();
         $this->tgl_kembali = Carbon::now()->addDays(7);
 
+        // simpan data pinjam utama
         $pinjam = Pinjam::create([
-            'user_id' => $this->user,
-            'tgl_pinjam' => $this->tgl_pinjam,
+            'user_id'     => $this->user,
+            'tgl_pinjam'  => $this->tgl_pinjam,
             'tgl_kembali' => $this->tgl_kembali,
-            'status' => 'pinjam'
+            'status'      => 'pinjam'
         ]);
 
-        foreach ($this->buku as $bukuId) {
+        // loop langsung berdasarkan mapping buku → eksemplar
+        foreach ($this->kodePerBuku as $bukuId => $eksemplarId) {
             $buku = Buku::find($bukuId);
+            $eksemplar = EksemplarBuku::find($eksemplarId);
 
-            if (!$buku || $buku->jumlah < 1) {
-                session()->flash('error', 'Stok buku "' . ($buku->judul ?? 'Tidak ditemukan') . '" habis!');
+            if (!$buku || !$eksemplar) {
                 continue;
             }
 
-            $buku->decrement('jumlah');
-
-            if ($buku->jumlah == 0) {
-                $buku->status = 'dipinjam';
-                $buku->save();
+            if ($eksemplar->status === 'dipinjam') {
+                session()->flash('error', "Eksemplar {$eksemplar->kode_eksemplar} sudah dipinjam!");
+                continue;
             }
 
-            DetailPinjam::create([
-                'pinjam_id' => $pinjam->id,
-                'buku_id' => $bukuId,
+            // update status eksemplar
+            $eksemplar->update(['status' => 'dipinjam']);
+
+            // update stok buku
+            $buku->jumlah = EksemplarBuku::where('buku_id', $buku->id)
+                ->where('status', 'tersedia')
+                ->count();
+            $buku->status = $buku->jumlah > 0 ? 'tersedia' : 'habis';
+            $buku->save();
+
+            // simpan detail pinjam
+            DetailPinjam::firstOrCreate([
+                'pinjam_id'    => $pinjam->id,
+                'buku_id'      => $bukuId,
+                'eksemplar_id' => $eksemplarId,
+            ], [
+                'kode_eksemplar' => $eksemplar->kode_eksemplar,
+                'tgl_kembali'    => $this->tgl_kembali,
             ]);
         }
 
-        $this->reset(['user', 'buku']);
+        // reset form
+        $this->reset(['user', 'buku', 'kelas', 'kodePerBuku', 'tgl_pinjam', 'tgl_kembali']);
         session()->flash('success', 'Berhasil Proses Data!');
         return redirect()->route('pinjam');
     }
+
 
     public function edit($id)
     {

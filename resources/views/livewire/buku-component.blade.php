@@ -35,11 +35,14 @@
                                 <td>{{ $data->tahun }}</td>
                                 <td>{{ $data->jumlah }}</td>
                                 <td>
+                                    <a href="{{ route('buku.eksemplar', $data->id) }}"
+                                        class="btn btn-success btn-sm">Detail</a>
                                     <a href="#" wire:click="edit({{ $data->id }})" class="btn btn-sm btn-info"
                                         data-toggle="modal" data-target="#editPage">Ubah</a>
                                     <a href="#" wire:click="confirm({{ $data->id }})"
                                         class="btn btn-sm btn-danger" data-toggle="modal"
                                         data-target="#deletePage">Hapus</a>
+
                                 </td>
                             </tr>
                         @endforeach
@@ -63,6 +66,16 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        {{-- KODE BUKU --}}
+                        <div class="form-group">
+                            <label>Kode Buku</label>
+                            <input type="text" class="form-control" wire:model="kode_buku"
+                                value="{{ old('kode_buku') }}">
+                            @error('kode_buku')
+                                <small class="form-text text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
                         {{-- JUDUL --}}
                         <div class="form-group">
                             <label>Judul</label>
@@ -82,9 +95,9 @@
                         </div>
 
                         {{-- KATEGORI --}}
-                        <div class="form-group">
+                        <div class="form-group" wire:ignore>
                             <label>Kategori</label>
-                            <select wire:model="kategori" class="form-control">
+                            <select id="kategoriSelect" class="form-control" style="width: 100%">
                                 <option value="">--Pilih--</option>
                                 @foreach ($categori as $data)
                                     <option value="{{ $data->id }}">{{ $data->nama }}</option>
@@ -94,6 +107,7 @@
                                 <small class="form-text text-danger">{{ $message }}</small>
                             @enderror
                         </div>
+
 
                         {{-- PENULIS --}}
                         <div class="form-group">
@@ -136,7 +150,8 @@
                         {{-- JUMLAH --}}
                         <div class="form-group">
                             <label>Jumlah</label>
-                            <input type="text" class="form-control" wire:model="jumlah" value="{{ old('jumlah') }}">
+                            <input type="text" class="form-control" wire:model="jumlah"
+                                value="{{ old('jumlah') }}">
                             @error('jumlah')
                                 <small class="form-text text-danger">{{ $message }}</small>
                             @enderror
@@ -224,18 +239,20 @@
                             @enderror
                         </div>
 
-                        <div class="form-group">
-                            <label>Kategori</label>
-                            <select wire:model="kategori" class="form-control">
-                                <option value="">--Pilih--</option>
-                                @foreach ($categori as $data)
-                                    <option value="{{ $data->id }}">{{ $data->nama }}</option>
-                                @endforeach
-                            </select>
-                            @error('kategori')
-                                <small class="form-text text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
+                        {{-- KATEGORI --}}
+                        <div class="form-group" wire:ignore>
+    <label>Kategori</label>
+    <select id="kategoriSelectEdit" class="form-control" style="width: 100%">
+        <option value="">-- Pilih --</option>
+        @foreach ($categori as $data)
+            <option value="{{ $data->id }}">{{ $data->nama }}</option>
+        @endforeach
+    </select>
+    @error('kategori')
+        <small class="form-text text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
 
                         <div class="form-group">
                             <label>Penulis</label>
@@ -355,7 +372,7 @@
     </div>
 </div>
 
-{{-- skript tambah --}}
+{{-- skript slot tambah --}}
 @push('scripts')
     <script>
         $(document).ready(function() {
@@ -378,7 +395,7 @@
     </script>
 @endpush
 
-{{-- skript ubah --}}
+{{-- skript slot ubah --}}
 @push('scripts')
     <script>
         function initSelect2(modalId) {
@@ -409,6 +426,56 @@
             });
         });
     </script>
+@endpush
+
+{{-- skript kategori tambah --}}
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // Kategori pakai Select2 di Tambah
+            $('#kategoriSelect').select2({
+                placeholder: '--Pilih--',
+                dropdownParent: $('#addPage .modal-content'),
+                allowClear: true,
+                width: '100%'
+            }).on('change', function() {
+                @this.set('kategori', $(this).val()); // sync ke Livewire
+            });
+        });
+    </script>
+@endpush
+
+{{-- skript kategori ubah --}}
+@push('scripts')
+<script>
+    $(document).ready(function () {
+        $('#kategoriSelectEdit').select2({
+            placeholder: '-- Pilih --',
+            dropdownParent: $('#editPage .modal-content'),
+            allowClear: true,
+            width: '100%'
+        }).on('change', function () {
+            let selected = $(this).val();
+            @this.set('kategori', selected);
+        });
+
+        // setiap kali modal edit dibuka, set value sesuai Livewire
+        $('#editPage').on('shown.bs.modal', function () {
+            let currentValue = @this.get('kategori');
+            $('#kategoriSelectEdit').val(currentValue).trigger('change.select2');
+        });
+    });
+</script>
+@endpush
+
+
+@push('styles')
+    <style>
+        /* Fix posisi dropdown select2 di atas modal */
+        .select2-container {
+            z-index: 2000 !important;
+        }
+    </style>
 @endpush
 
 @push('styles')

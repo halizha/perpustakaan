@@ -1,6 +1,6 @@
 <div class="login-container">
     <div class="login-header">
-        <img src="{{ asset('assets/login.png') }}" alt="Library Logo">
+        <img src="{{ asset('assets/logo.png') }}" alt="Library Logo">
         <h2>Perpustakaan Login</h2>
     </div>
     @if ($errorMessage)
